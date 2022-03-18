@@ -5,7 +5,9 @@ html {
 body {
   margin: auto;
   padding: 0 1em;
-  max-width: 80ex;
+  max-width: 60ex;
+
+  hyphens: auto;
 }
 
 h1 {

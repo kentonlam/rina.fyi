@@ -29,6 +29,7 @@ main = hakyllWith config $
         route $ setExtension "html"
         compile $
           pandocCompiler
+            >>= loadAndApplyTemplate "templates/with-title.html" defaultContext
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls
     match "posts/*" $
@@ -37,6 +38,7 @@ main = hakyllWith config $
         compile $
           pandocCompiler
             >>= loadAndApplyTemplate "templates/post.html" postCtx
+            >>= loadAndApplyTemplate "templates/with-title.html" postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
     create ["archive.html"] $
@@ -51,6 +53,7 @@ main = hakyllWith config $
                     `mappend` defaultContext
             makeItem ""
               >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+              >>= loadAndApplyTemplate "templates/with-title.html" archiveCtx
               >>= loadAndApplyTemplate "templates/default.html" archiveCtx
               >>= relativizeUrls
     match "index.html" $

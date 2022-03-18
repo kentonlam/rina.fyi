@@ -1,5 +1,6 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 import Data.Monoid (mappend)
 import Hakyll
@@ -16,6 +17,10 @@ config =
 main :: IO ()
 main = hakyllWith config $
   do
+    create ["CNAME"] $ do
+      route idRoute
+      compile $ makeItem @String "rina.fyi"
+
     match "images/*" $
       do
         route idRoute

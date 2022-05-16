@@ -1,12 +1,10 @@
-from copy import copy
-from dataclasses import dataclass
-from pathlib import PurePath
 import shutil
 import subprocess
-from subprocess import PIPE
-from typing import Callable, Generic, TypeVar
-
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
+from pathlib import PurePath
+from subprocess import PIPE
+from typing import Callable, TypeVar
 
 from gen.context import Context, Page
 
@@ -17,17 +15,12 @@ class Gen(metaclass=ABCMeta):
     @abstractmethod
     def build(self, ctx: Context) -> Context: ...
 
-class Pred(metaclass=ABCMeta):
-    @abstractmethod
-    def eval(self, page: Page) -> bool: ...
-
 @dataclass
 class Filter(Gen):
     pred: Callable[[Page], bool]
 
     def build(self, ctx: Context) -> Context:
-        ctx.pages = [p for p in ctx.pages if self.pred(p)]
-        return ctx
+        return ctx.narrow(k for k, v in ctx.pages.items() if v and self.pred(v))
 
 @dataclass(init=False)
 class Seq(Gen):
@@ -37,8 +30,10 @@ class Seq(Gen):
         self.args = args
     
     def build(self, ctx: Context): 
+        c = ctx
         for gen in self.args:
-            ctx = gen.build(ctx)
+            c = gen.build(c)
+        ctx.update(c)
         return ctx
 
 @dataclass(init=False)
@@ -50,7 +45,7 @@ class Alt(Gen):
 
     def build(self, ctx: Context): 
         for gen in self.args:
-            gen.build(copy(ctx))
+            ctx.update(gen.build(ctx))
         return ctx
 
 @dataclass
@@ -58,8 +53,8 @@ class Map(Gen):
     f: Callable[[Page], Page]
     
     def build(self, ctx: Context) -> Context:
-        for f in ctx.pages:
-            self.f(f)
+        for k, v in ctx.pages.items():
+            if v: ctx.pages[k] = self.f(v)
         return ctx
 
 def FilterExt(*exts: str) -> Filter:
@@ -86,11 +81,18 @@ def FilterPrefix(*prefixes: str) -> Filter:
 def Pandoc(f: Page) -> Page:
     pandoc = shutil.which('pandoc')
     assert pandoc, "pandoc could not be not found in PATH"
-    proc = subprocess.Popen([pandoc], stdin=PIPE, stdout=PIPE)
+    proc = subprocess.Popen([pandoc, '--katex'], stdin=PIPE, stdout=PIPE)
 
     out, _ = proc.communicate(f.data)
-    print(out)
+    # print(out)
+    assert f.output, "Pandoc must be used with a defined output path"
+    f.output = f.output.with_suffix('.html')
     return f
+
+class PrintContext(Gen):
+    def build(self, ctx: Context) -> Context:
+        print('seen context: ', ctx)
+        return ctx
 
 def Print(f: Page) -> Page:
     print('found: ', f)
@@ -100,10 +102,17 @@ def Print(f: Page) -> Page:
 if __name__ == '__main__':
     c = Context.from_root('./gen/site')
 
-    Seq(
+    Alt(
         Seq(
             FilterPath('gen/site'),
             FilterExt('.md'),
-            Map(Pandoc)
+            PrintContext(),
+            Map(Pandoc),
+            PrintContext()
         ),
+        Seq(
+            FilterExt('.png'),
+            PrintContext(),
+        ),
+        PrintContext()
     ).build(c)

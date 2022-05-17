@@ -32,6 +32,7 @@ def parse_metadata(b: str) -> dict[str,str]:
 def Pandoc(p: Page) -> Page:
     pandoc = shutil.which('pandoc')
     assert pandoc, "pandoc could not be not found in PATH"
+    
     template = MODULE_PATH / 'pandoc.html'
     proc = subprocess.Popen(
         [pandoc, '-s', '--toc', '--katex', '--template=' + str(template)], 

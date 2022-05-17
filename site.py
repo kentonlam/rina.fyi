@@ -14,5 +14,8 @@ Alt(
         FilterExt('.png'),
         PrintContext(),
     ),
-    PrintContext()
+    Seq(
+        FilterExt('.html'),
+        Map(Mako('default.html'))
+    )
 ).build(c).write('build')

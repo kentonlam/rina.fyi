@@ -59,21 +59,21 @@ class Map(Gen):
 
 def FilterExt(*exts: str) -> Filter:
     def filter(p: Page) -> bool:
-        ext = p.source and PurePath(p.source).suffix
+        ext = p.output and PurePath(p.output).suffix
         return ext in exts
     return Filter(filter)
 
 def FilterPath(*prefixes: str) -> Filter:
     paths = [PurePath(p) for p in prefixes]
     def filter(p: Page) -> bool:
-        s = p.source
+        s = p.output
         if not s: return False
         return any(s.is_relative_to(p) for p in paths)
     return Filter(filter)    
 
 def FilterPrefix(*prefixes: str) -> Filter:
     def filter(p: Page) -> bool:
-        s = p.source and str(p.source)
+        s = p.output and str(p.output)
         if not s: return False
         return any(s.startswith(p) for p in prefixes)
     return Filter(filter)   

@@ -1,8 +1,11 @@
 from dataclasses import dataclass, field
-from os import PathLike
+from os import PathLike, makedirs
 from pathlib import Path, PurePath
+from shutil import rmtree
 from typing import Any, Iterable
 
+
+MODULE_PATH = PurePath(__file__).parent
 
 @dataclass
 class Page:
@@ -14,7 +17,9 @@ class Page:
 
     def build(self, root: str | PathLike): 
         if self.source and self.output:
-            with open(root / self.output, 'wb') as f:
+            p = root / self.output
+            makedirs(p.parent, exist_ok=True)
+            with open(p, 'wb') as f:
                 f.write(self.data)
 
     @classmethod
@@ -52,7 +57,9 @@ class Context:
         )
         return new
 
-    # def widen(self) -> 'Context':
-    #     assert self.parent, "attempt to widen Context with no parent"
-    #     self.parent.pages.update(self.pages)
-    #     return self.parent
+    def write(self, out: str | PathLike):
+        rmtree(out, ignore_errors=True)
+        makedirs(out, exist_ok=True)
+        for k, p in self.pages.items():
+            if p:
+                p.build(out)

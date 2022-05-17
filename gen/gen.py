@@ -1,9 +1,6 @@
-import shutil
-import subprocess
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from pathlib import PurePath
-from subprocess import PIPE
 from typing import Callable, TypeVar, cast
 from mako.template import Template
 
@@ -49,9 +46,11 @@ class Alt(Gen):
             ctx.update(gen.build(ctx))
         return ctx
 
+PageTransform = Callable[[Page], Page | None]
+
 @dataclass
 class Map(Gen):
-    f: Callable[[Page], Page | None]
+    f: PageTransform
     
     def build(self, ctx: Context) -> Context:
         for k, v in ctx.pages.items():
@@ -79,27 +78,6 @@ def FilterPrefix(*prefixes: str) -> Filter:
         return any(s.startswith(p) for p in prefixes)
     return Filter(filter)   
 
-def Pandoc(f: Page) -> Page:
-    pandoc = shutil.which('pandoc')
-    assert pandoc, "pandoc could not be not found in PATH"
-    proc = subprocess.Popen([pandoc, '--katex'], stdin=PIPE, stdout=PIPE)
-
-    out, _ = proc.communicate(f.data)
-    # print(out)
-    assert f.output, "Pandoc must be used with a defined output path"
-    f.output = f.output.with_suffix('.html')
-    return f
-
-def Mako(t: str) -> Callable[[Page], Page]:
-    template = Template(filename=t, output_encoding='utf-8')
-
-    def apply(p: Page) -> Page:
-        kwargs = p.__dict__ | p.meta
-        p.data = cast(bytes, template.render(**kwargs))
-        print(p.data)
-        return p
-    return apply
-
 class PrintContext(Gen):
     def build(self, ctx: Context) -> Context:
         print('seen context: ', ctx)
@@ -109,22 +87,3 @@ def Print(f: Page) -> Page:
     print('found: ', f)
     return f
 
-
-if __name__ == '__main__':
-    c = Context.from_root('./gen/site')
-
-    Alt(
-        Seq(
-            FilterPath('gen/site'),
-            FilterExt('.md'),
-            PrintContext(),
-            Map(Pandoc),
-            Map(Mako('template.html')),
-            PrintContext()
-        ),
-        Seq(
-            FilterExt('.png'),
-            PrintContext(),
-        ),
-        PrintContext()
-    ).build(c)

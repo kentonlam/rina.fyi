@@ -1,10 +1,9 @@
 from gen import *
 
 c = Context.from_root('./gen/site')
-
+print(c)
 Alt(
     Seq(
-        FilterPath('gen/site'),
         FilterExt('.md'),
         PrintContext(),
         Map(Pandoc),

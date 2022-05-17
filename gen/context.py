@@ -23,11 +23,12 @@ class Page:
                 f.write(self.data)
 
     @classmethod
-    def from_file(cls, file: str | PathLike) -> 'Page':
+    def from_file(cls, file: str | PathLike, root: str | PathLike) -> 'Page':
         p = PurePath(file)
         with open(p, 'rb') as f:
             data = f.read()
-        return cls(p, p, data)
+        rel = p.relative_to(root)
+        return cls(rel, rel, data)
 
 
 @dataclass
@@ -40,7 +41,7 @@ class Context:
     def from_root(cls, root: str | PathLike) -> 'Context':
         p = Path(root)
         pages: dict[str, Page | None] = {
-            str(f): Page.from_file(f)
+            str(f): Page.from_file(f, p)
             for f in p.glob('**/*')
             if f.is_file()
         }

@@ -24,11 +24,6 @@ class Page:
             data = f.read()
         return cls(p, p, data)
 
-# @dataclass
-# class HTMLPage(DataPage):
-#     body: str = ''
-#     head: str = ''
-
 
 @dataclass
 class Context:

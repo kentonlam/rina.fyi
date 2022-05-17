@@ -4,7 +4,8 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from pathlib import PurePath
 from subprocess import PIPE
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, cast
+from mako.template import Template
 
 from gen.context import Context, Page
 
@@ -50,7 +51,7 @@ class Alt(Gen):
 
 @dataclass
 class Map(Gen):
-    f: Callable[[Page], Page]
+    f: Callable[[Page], Page | None]
     
     def build(self, ctx: Context) -> Context:
         for k, v in ctx.pages.items():
@@ -89,6 +90,16 @@ def Pandoc(f: Page) -> Page:
     f.output = f.output.with_suffix('.html')
     return f
 
+def Mako(t: str) -> Callable[[Page], Page]:
+    template = Template(filename=t, output_encoding='utf-8')
+
+    def apply(p: Page) -> Page:
+        kwargs = p.__dict__ | p.meta
+        p.data = cast(bytes, template.render(**kwargs))
+        print(p.data)
+        return p
+    return apply
+
 class PrintContext(Gen):
     def build(self, ctx: Context) -> Context:
         print('seen context: ', ctx)
@@ -108,6 +119,7 @@ if __name__ == '__main__':
             FilterExt('.md'),
             PrintContext(),
             Map(Pandoc),
+            Map(Mako('template.html')),
             PrintContext()
         ),
         Seq(

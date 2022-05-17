@@ -10,6 +10,7 @@ def Mako(t: str) -> PageTransform:
 
     def apply(p: Page) -> Page:
         kwargs = p.__dict__ | p.meta
+        kwargs['body'] = kwargs['data'].decode('utf-8')
         p.data = cast(bytes, template.render(**kwargs))
         print(p.data)
         return p

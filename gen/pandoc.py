@@ -11,20 +11,20 @@ def parse_date(s: str) -> date | datetime:
     except ValueError:
         return datetime.fromisoformat(s)
 
-def parse_metadata(b: bytes) -> dict[str,bytes]:
+def parse_metadata(b: str) -> dict[str,str]:
     lines = b.splitlines(keepends=True)
-    parsed: dict[str,bytes] = {}
+    parsed: dict[str,str] = {}
 
     sep = lines[0]
     name = None
-    section = b''
+    section = ''
     for l in lines[1:]:
         if name is None:
-            name = l.strip().decode('utf-8')
+            name = l.strip()
         elif l == sep:
             parsed[name] = section.rstrip()
             name = None
-            section = b''
+            section = ''
         else:
             section += l
     return parsed
@@ -44,8 +44,8 @@ def Pandoc(p: Page) -> Page:
     print()
     print()
 
-    parsed = parse_metadata(out)
-    p.data = parsed['body']
+    parsed = parse_metadata(out.decode('utf-8'))
+    p.data = parsed['body'].encode('utf-8')
 
     meta = json.loads(parsed['meta'])
     if meta.get('date'):

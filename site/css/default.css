@@ -26,3 +26,11 @@ h1 {
   height: 80px;
   width: 80px;
 }
+
+figure {
+  margin: 0;
+}
+
+figure > img {
+  width: 100%;
+}

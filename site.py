@@ -9,6 +9,7 @@ Alt(
     ),
     Seq(
         FilterPath('p'),
+        FilterExt('.html'),
         Map(Mako('templates/post.html')),
         Tag('md')
     ),

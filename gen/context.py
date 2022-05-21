@@ -19,7 +19,10 @@ class Page:
 
     def url(self) -> str:
         assert self.output
-        return quote('/' + self.output.as_posix())
+        p = self.output
+        if p.suffix in ('.html', '.htm'):
+            p = p.with_suffix('')
+        return quote('/' + p.as_posix())
 
     def build(self, root: str | PathLike): 
         assert self.output, "attempt to build page with no defined output"

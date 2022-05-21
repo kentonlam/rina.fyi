@@ -1,0 +1,11 @@
+<ul>
+    % for p in md:
+        <li>
+            <a href="${p.url()}">${p.meta.get('title', str(p.output))}</a>
+            % if 'excerpt' in p.meta:
+            &mdash;
+            ${p.meta['excerpt']} 
+            % endif
+        </li>
+    % endfor
+</ul>

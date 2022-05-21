@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>primitive and tail recursion &mdash; Katrina Lam</title>
         <link rel="stylesheet" href="/css/default.css" />
+        <link rel="stylesheet" href="/css/code.css" />
         <!-- <link rel="stylesheet" href="/css/pandoc.css" /> -->
     </head>
     <body>
@@ -58,6 +59,201 @@ f(b,0) &amp;= f_0(b) \\
 f(b, \operatorname {Suc} n) &amp;= f_s(b,n, f(b,n))
 \end{aligned}
 </span></p>
+<p>here, <span class="math inline">f_0</span> and <span class="math inline">f_s</span> must also be primitive recursive functions with the following types: <span class="math inline">f_0 : B \to A</span> and <span class="math inline">f_s : B \to \mathbb N \to A \to A</span>.</p>
+<p>This differs slightly from the notation in the claim. We name the sub-functions <span class="math inline">f_0</span> and <span class="math inline">f_s</span> because of their role in defining the base zero case and the successor case, respectively. We also use the successor function to make explicit the recursive structure.</p>
+<p>If we look closely at the recursive case, we will notice a pattern. Clearly, there is recursion at work but the pattern of the recursion is quite specific: it uses a function (<span class="math inline">f_s</span>) to combine the current value with the recursive value. This should be familiar because it appears in many types, for example in a possible implementation of <code>map</code> for List.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span><span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span> _ [] <span class="ot">=</span> []</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span> f (x<span class="op">:</span>xs) <span class="ot">=</span> f x <span class="op">:</span> <span class="fu">map</span> f xs</span></code></pre></div>
+<p>Though it’s less obvious, this takes the current value <code>x</code> and combines it using <code>:</code> with the recursive call on the rest of the list. The general pattern for this is called a <em>fold</em>. In Haskell, this is defined in the Foldable typeclass.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="dt">Foldable</span> t <span class="kw">where</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    foldr ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> b</span></code></pre></div>
+<p>We will come back to this later after looking at the claim.</p>
+<h2 id="claim">claim</h2>
+<p>The code given to support the claim is below. Firstly, for the case where <span class="math inline">B</span> is not needed.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ot">t ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>t h u <span class="dv">0</span> <span class="ot">=</span> u</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>t h g y <span class="ot">=</span> t h (h (y<span class="op">-</span><span class="dv">1</span>) g) (y<span class="op">-</span><span class="dv">1</span>)</span></code></pre></div>
+<p>We will take this and tweak it to more closely match our definition above.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>tailrec fs f0 <span class="dv">0</span> <span class="ot">=</span> f0</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>tailrec fs f0 n <span class="ot">=</span> tailrec fs (fs (n<span class="op">-</span><span class="dv">1</span>) f0) (n<span class="op">-</span><span class="dv">1</span>)</span></code></pre></div>
+<p>There is also a version for where the argument <span class="math inline">B</span> is included. This is done using a list.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tl ::</span> [b] <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tl xs h u <span class="dv">0</span> <span class="ot">=</span> u xs</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>tl xs h g y <span class="ot">=</span> tl xs h (\x <span class="ot">-&gt;</span> h xs (y<span class="op">-</span><span class="dv">1</span>) g) (y<span class="op">-</span><span class="dv">1</span>)</span></code></pre></div>
+<p>Here, a few things are interesting but first, we will break down the accursed type signature by matching it with the primitive recursive definition.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tl ::</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    [b] <span class="ot">-&gt;</span>          <span class="co">-- initial context</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    (               <span class="co">-- f_s function (?)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        [b] <span class="ot">-&gt;</span>          <span class="co">-- context injected</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Int</span> <span class="ot">-&gt;</span>          <span class="co">-- n of current call</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span>   <span class="co">-- result of recursive subcall (?)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        a               <span class="co">-- result of combining</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="ot">-&gt;</span> </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span>   <span class="co">-- f_0 function</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Int</span> <span class="ot">-&gt;</span>          <span class="co">-- natural number to evaluate function at</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    a               <span class="co">-- result of tail recursive function</span></span></code></pre></div>
+<p>It is not clear why <code>([b] -&gt; a)</code> is needed instead of <code>a</code> in the <span class="math inline">f_s</span> parameter, since this should represent the recursive call’s result in the definition. It is also not clear why <code>\x -&gt;</code> is used in the recursive call, then <code>x</code> is not used in the expression.</p>
+<p>After some thinking, it appears to be this is done so it matches the arguments of the outer <code>tl</code> function, both taking a <code>[b] -&gt; a</code> function. This shouldn’t be needed because we always have access to a <code>[b]</code> as an argument so can evaluate it to <code>a</code>.</p>
+<p>We will rewrite this slightly to replace the <code>[b] -&gt; a</code> argument and also rename the variables. This lets it more closely match the mathematical definitions. We will also replace the <code>[b]</code> with a more general <code>b</code> because the structure is not needed.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec&#39; ::</span> b <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>tailrec&#39; b fs f0 <span class="dv">0</span> <span class="ot">=</span> f0 b</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>tailrec&#39; b fs f0 n <span class="ot">=</span> tailrec&#39; bs fs (\b <span class="ot">-&gt;</span> fs b (n<span class="op">-</span><span class="dv">1</span>) (f0 b)) (n<span class="op">-</span><span class="dv">1</span>)</span></code></pre></div>
+<p>Additionally, we should be able to write this version with <code>[b]</code> using just <code>tailrec</code> and partially applying functions.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec&#39;&#39; ::</span> [b] <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tailrec&#39;&#39; bs fs f0 n <span class="ot">=</span> tailrec (fs bs) (f0 bs) n</span></code></pre></div>
+<p>It is easy to see the types match up and hence the function is (obviously) correct.</p>
+<h3 id="examples">examples</h3>
+<p>We will now look at the given examples which we write verbatim below. Note that these use the first versions of <code>t</code> and <code>tl</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- factorial</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fact <span class="ot">=</span> t (\x <span class="ot">-&gt;</span> (\y <span class="ot">-&gt;</span> (x<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span>y)) <span class="dv">1</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">-- 7^x</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>seventothe <span class="ot">=</span> tl [<span class="dv">7</span>] (\xs <span class="ot">-&gt;</span> \y <span class="ot">-&gt;</span> \z <span class="ot">-&gt;</span> (xs <span class="op">!!</span> <span class="dv">0</span>) <span class="op">*</span> (z [<span class="dv">7</span>])) (\xs <span class="ot">-&gt;</span> <span class="dv">1</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- x^y</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>exponen <span class="ot">=</span> \x <span class="ot">-&gt;</span> tl [x] (\xs <span class="ot">-&gt;</span> \y <span class="ot">-&gt;</span> \z <span class="ot">-&gt;</span> (xs <span class="op">!!</span> <span class="dv">0</span>) <span class="op">*</span> (z [x])) (\xs <span class="ot">-&gt;</span> <span class="dv">1</span>)</span></code></pre></div>
+<p>We will skip looking at each example in detail. Some notes:</p>
+<ul>
+<li>Use of many <code>\</code> expressions makes the lambda functions very long.</li>
+<li>Use of <code>[b]</code> as a list makes using the argument inconvenient.</li>
+<li>The inner <code>[b] -&gt; a</code> parameter in <code>tl</code> makes it difficult to use. In the last two cases, although the function is a constant it needs to be evaluated with some list.</li>
+</ul>
+<h2 id="the-difference">the difference</h2>
+<p>We return to our original definition of a primitive recursive function <span class="math inline">f : B \to \mathbb N \to A</span>. <span class="math display">
+\begin{aligned}
+f(b,0) &amp;= f_0(b) \\ 
+f(b, \operatorname {Suc} n) &amp;= f_s(b,n, f(b,n))
+\end{aligned}
+</span> In fact, we will remove the <span class="math inline">b</span> parameter by assuming partial application is possible. Now, we have <span class="math inline">f : \mathbb N \to A</span>. The <span class="math inline">B</span> parameter is also removed from <span class="math inline">f_0</span> and <span class="math inline">f_s</span>. <span class="math display">
+\begin{aligned}
+f(0) &amp;= f_0 \\ 
+f(\operatorname {Suc} n) &amp;= f_s(n, f(n))
+\end{aligned}
+</span> We can write this in Haskell as below. Note that <span class="math inline">n-1</span> is used because we don’t have the <span class="math inline">\operatorname{Suc} n</span> pattern matching on the left hand side.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ot">primrec ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>primrec fs f0 <span class="dv">0</span> <span class="ot">=</span> f0</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>primrec fs f0 n <span class="ot">=</span> fs (n<span class="op">-</span><span class="dv">1</span>) (primrec fs f0 (n<span class="op">-</span><span class="dv">1</span>))</span></code></pre></div>
+<p>Now recall the definition of <code>t</code> in the claim. We will copy our renamed <code>tailrec</code> version here.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>tailrec fs f0 <span class="dv">0</span> <span class="ot">=</span> f0</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>tailrec fs f0 n <span class="ot">=</span> tailrec fs (fs (n<span class="op">-</span><span class="dv">1</span>) f0) (n<span class="op">-</span><span class="dv">1</span>)</span></code></pre></div>
+<p><em>Now</em>, observe the subtle difference between these two. They both recurse and use <span class="math inline">f_s</span> to combine results but the difference is in the order results are combined. <code>primrec</code> combines it last, combining with <span class="math inline">n-1</span> after the recursive call. <code>tailrec</code> combines it before the recursive call with <code>fs (n-1) f0</code>.</p>
+<p>We can make this more obvious by calling the two functions with arguments which will generate a string. This should make it easier to see the order <span class="math inline">f_s</span> is evaluated as well as its arguments.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fs n a <span class="ot">=</span> <span class="st">&quot;fs (&quot;</span> <span class="op">&lt;&gt;</span> <span class="fu">show</span> n <span class="op">&lt;&gt;</span> <span class="st">&quot;) (&quot;</span> <span class="op">&lt;&gt;</span> a <span class="op">&lt;&gt;</span> <span class="st">&quot;)&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>f0 <span class="ot">=</span> <span class="st">&quot;f0&quot;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">putStrLn</span> <span class="op">$</span> primrec fs f0 <span class="dv">3</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">putStrLn</span> <span class="op">$</span> tailrec fs f0 <span class="dv">3</span></span></code></pre></div>
+<p>Executing this gives us the following output:</p>
+<pre><code>fs (2) (fs (1) (fs (0) (f0)))
+fs (0) (fs (1) (fs (2) (f0)))</code></pre>
+<p>This makes it clear why the tail recursive form doesn’t work with non-commutative <span class="math inline">f_s</span> functions.</p>
+<h2 id="the-point">the point</h2>
+<p>Tail recursion is commonly used in procedural languages because it lets the compiler perform <em>tail call optimisation</em>. This is needed because function calls are usually very slow. Tail call optimisation allows a recursive call to <em>reuse</em> the previous call’s stack frame, avoiding the time and memory overhead of allocating a new frame. However, this can only be done in very specific circumstances. The recursive call needs to match the structure of the original call, possibly with some modified arguments.</p>
+<p>However, this is much less of a concern in Haskell for a couple of reasons. Firstly, being a functional programming language, Haskell is centred around functions and so, function calls are extremely quick in almost all cases. Secondly and more importantly, naïve tail recursion does not provide the same benefits as ordinary tail call optimisation. This is because of laziness.</p>
+<p>Haskell is a lazy language. <em>Everything</em> is lazy unless explicitly made strict. This means that even if something appears tail recursive in the traditional sense, it could still be building up a large unevaluated calculation. See <a href="https://wiki.haskell.org/Performance/Strictness">Strictness</a> on HaskellWiki and <a href="https://stackoverflow.com/a/13052612">Stack Overflow</a>.</p>
+<p>Hence, blindly rewriting Haskell functions to tail recursion for “tail” “call” “optimisation” is a bad idea. In the majority of cases, it’s a better idea to use more idiomatic higher order functions for recursion and traversal. Where optimisation is needed, this should be done with an understanding of Haskell’s evaluation model and performance characteristics.</p>
+<h2 id="beyond-the-point">beyond the point</h2>
+<p>These are some more notes which link this notion of “recursion” with some other things I’ve encountered. These will be more brief.</p>
+<h3 id="folds">folds</h3>
+<p>The different evaluation order of <code>primrec</code> and <code>tailrec</code> given above corresponds to the two directions of folding. Specifically, you can <code>foldr</code> which combines the first element with the recursive subresult, or <code>foldl</code> which combines the recursive subresult with the last element.</p>
+<p>To highlight this point, I would’ve liked to write a Foldable instance for Int but unfortunately we can’t do that because Foldable needs a higher order type (for example, you say <code>Foldable []</code> to say <code>[a]</code> is foldable for all <code>a</code>).</p>
+<p>Instead, we observe that the recursive evaluation passes decreasing integers to the <code>f_s</code> function. With this in mind, we will convert integers to a list the fold over that list!</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ot">intToList ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>intToList <span class="dv">0</span> <span class="ot">=</span> []</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>intToList n <span class="ot">=</span> [n<span class="op">-</span><span class="dv">1</span>,n<span class="op">-</span><span class="dv">2</span><span class="op">..</span><span class="dv">0</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">-- start at n-1 because of primrec and tailrec definition</span></span></code></pre></div>
+<p>We will use this along with the foldr and foldl functions to rewrite tailrec and primrec. First, we show foldl and foldr for the <code>[Int]</code> type to see their differences.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span><span class="ot"> ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> b</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f b [] <span class="ot">=</span> b</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f b (x<span class="op">:</span>xs) <span class="ot">=</span> f x (<span class="fu">foldr</span> f b xs)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span><span class="ot"> ::</span> (b <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> b</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f b [] <span class="ot">=</span> b</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f b (x<span class="op">:</span>xs) <span class="ot">=</span> <span class="fu">foldl</span> f (f b x) xs</span></code></pre></div>
+<p>We note that foldl is a sort of tail recursion and foldr is more closer to the primitive recursion definition. And hence, we will write this:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>primrecfold fs f0 n <span class="ot">=</span> <span class="fu">foldr</span> fs f0 (intToList n)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>tailrecfold fs f0 n <span class="ot">=</span> <span class="fu">foldl</span> (<span class="fu">flip</span> fs) f0 (intToList n)</span></code></pre></div>
+<p>We can check that these produce the same orders as their original versions.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStrLn</span> <span class="op">$</span> primrec fs f0 <span class="dv">3</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStrLn</span> <span class="op">$</span> primrecfold fs f0 (<span class="dv">3</span><span class="ot">::</span><span class="dt">Int</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStrLn</span> <span class="op">$</span> tailrec fs f0 <span class="dv">3</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStrLn</span> <span class="op">$</span> tailrecfold fs f0 (<span class="dv">3</span><span class="ot">::</span><span class="dt">Int</span>)</span></code></pre></div>
+<pre><code>fs (2) (fs (1) (fs (0) (f0)))
+fs (2) (fs (1) (fs (0) (f0)))
+fs (0) (fs (1) (fs (2) (f0)))
+fs (0) (fs (1) (fs (2) (f0)))</code></pre>
+<h4 id="strictness">strictness</h4>
+<p>One might also wonder which of foldl and foldr is faster in particular cases. Of course, this will depend on the functions used so we will consider adding up a list. Intuitively, this should be faster with tail recursion (and thus foldl) because it’s only a single number while recursing.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Foldable</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Time.Clock</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="ot">time ::</span> <span class="dt">IO</span> () <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>time f <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStrLn</span> <span class="st">&quot;start...&quot;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> getCurrentTime  </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  f</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  t1 <span class="ot">&lt;-</span> getCurrentTime</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStr</span> <span class="st">&quot;... end in &quot;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span> <span class="op">$</span> diffUTCTime t1 t0</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  time <span class="op">$</span> <span class="fu">print</span> <span class="op">$</span> <span class="fu">foldr</span> (<span class="op">+</span>) <span class="dv">0</span> [<span class="dv">1</span><span class="op">..</span><span class="dv">3000000</span>]</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  time <span class="op">$</span> <span class="fu">print</span> <span class="op">$</span> <span class="fu">foldl</span> (<span class="op">+</span>) <span class="dv">0</span> [<span class="dv">1</span><span class="op">..</span><span class="dv">3000000</span>]</span></code></pre></div>
+<p>They turn out to be extremely close.</p>
+<pre><code>start...
+4500001500000
+... end in 3.218930618s
+start...
+4500001500000
+... end in 3.392049483s</code></pre>
+<p>This is because of laziness. With Haskell’s lazy evaluation models, both are folds are doing almost the same thing; they’re just accumulating a computation of <code>+</code> which only gets evaluated at the end when the result is needed to print.</p>
+<p>Luckily, Data.Foldable also provides <code>'</code> variants of these two functions which are strict in the accumulated value. Changing it to this makes <code>foldl'</code> an order of magnitude faster than <code>foldr'</code>.</p>
+<pre><code>start...
+4500001500000
+... end in 2.308533222s
+start...
+4500001500000
+... end in 0.573823784s</code></pre>
+<h3 id="reader-monad">reader monad</h3>
+<p>There’s a funny pattern in OOP or Java land called <em>dependency injection</em>. It’s the idea that classes which depend on some value can, with the right library support, pull that value out of thin air from some context. There is a corresponding pattern in Haskell which is much neater and more concrete.</p>
+<p>Remember up above when we wrote this.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec&#39;&#39; ::</span> [b] <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>tailrec&#39;&#39; bs fs f0 n <span class="ot">=</span> tailrec (fs bs) (f0 bs) n</span></code></pre></div>
+<p>It sure looks like there’s some dependency on <code>bs</code> here. In fact, <code>tailrec''</code> doesn’t really need that argument at all; it only passes it to the other functions. It would be nice if we could write <code>tailrec''</code> without mentioning this dependency at all.</p>
+<p>It turns out we can do that. This idea of a context is the type <code>(-&gt;) a</code> or the <em>Reader monad</em>. This is instantiated with another type, say <code>[b]</code>, and defines an environment where we assume <code>[b]</code> is available. We will skip the details and just show it in use.</p>
+<p>We could’ve written <code>tailrec''</code> like so. We had to move the injected parameter to the end. The <code>fs' &lt;- fs</code> notation is used to obtain a version of <code>fs</code> with the parameter already partially applied.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec&#39;&#39;&#39; ::</span> ([b] <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> a</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>tailrec&#39;&#39;&#39; fs f0 n <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    fs&#39; <span class="ot">&lt;-</span> fs</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    f0&#39; <span class="ot">&lt;-</span> f0</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pure</span> <span class="op">$</span> tailrec fs&#39; f0&#39; n</span></code></pre></div>
+<p>In fact, we can do more. Since there’s a <code>pure</code> on the last line, this can be rewritten using Functor and Applicative functions.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ot">tailrec&#39;&#39;&#39;&#39; ::</span> ([b] <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> a</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>tailrec&#39;&#39;&#39;&#39; fs f0 n <span class="ot">=</span> tailrec <span class="op">&lt;$&gt;</span> fs <span class="op">&lt;*&gt;</span> f0 <span class="op">&lt;*&gt;</span> <span class="fu">pure</span> n</span></code></pre></div>
+<p>Brilliant!</p>
+<h3 id="type-theory">type theory</h3>
+<p>In Martin-Löf Type Theory, types are defined by specifying four sets of rules:</p>
+<ul>
+<li>formation rules describe how the type can be constructed,</li>
+<li>introduction rules describe how you can obtain an element of that type,</li>
+<li>elimination rules describe how you can use an element of that type, and</li>
+<li>computation rules relate the introduction and elimination rules.</li>
+</ul>
+<p>This notion of primitive recursion is so pervasive that it turns up as the elimination rule for natural numbers. Here, <span class="math inline">p_0</span> and <span class="math inline">p_S</span> are analogous to <span class="math inline">f_0</span> and <span class="math inline">f_s</span> in our definition. <span class="math inline">\Pi</span> defines a dependent function taking an argument <span class="math inline">n : \mathbb N</span>.</p>
+<figure>
+<img src="assets\image-20220514193026842.png" alt="image-20220514193026842" /><figcaption aria-hidden="true">image-20220514193026842</figcaption>
+</figure>
+<p>Moreover, the computation rules specify that it behaves identically to the primitive recursive definition. First for the base case,</p>
+<figure>
+<img src="assets\image-20220514193226724.png" alt="image-20220514193226724" /><figcaption aria-hidden="true">image-20220514193226724</figcaption>
+</figure>
+<p>and also the inductive case,</p>
+<figure>
+<img src="assets\image-20220514193236752.png" alt="image-20220514193236752" /><figcaption aria-hidden="true">image-20220514193236752</figcaption>
+</figure>
 
 
         </main>

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from gen.log import log
 from os import PathLike, makedirs
 from pathlib import Path, PurePath
 from shutil import rmtree
@@ -13,7 +14,7 @@ class Page:
     output: PurePath | None = None
 
     data: bytes = field(default=b'', repr=False)
-    meta: dict[str,Any] = field(default_factory=dict)
+    meta: dict[str,Any] = field(default_factory=dict, repr=False)
 
     def build(self, root: str | PathLike): 
         assert self.output, "attempt to build page with no defined output"
@@ -26,6 +27,7 @@ class Page:
     @classmethod
     def from_file(cls, file: str | PathLike, root: str | PathLike) -> 'Page':
         p = PurePath(file)
+        log.debug('loading file %s', p)
         with open(p, 'rb') as f:
             data = f.read()
         rel = p.relative_to(root)
@@ -40,6 +42,7 @@ class Context:
     # parent: 'Context' | None = None
 
     def add_page(self, page: Page):
+        log.debug('adding page to context %s', page)
         self.pages[str(page.source)] = page
 
     @classmethod
@@ -58,6 +61,7 @@ class Context:
         self.tags.update(other.tags)
 
     def narrow(self, keys: Iterable[str]) -> 'Context':
+        log.debug('narrowing context to %s', keys)
         new = Context(
             {k: self.pages[k] for k in keys}, 
             dict(self.tags)

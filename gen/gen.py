@@ -4,6 +4,7 @@ from pathlib import PurePath
 from typing import Any, Callable, TypeVar, cast
 from mako.template import Template
 
+from gen.log import log
 from gen.context import Context, Page
 
 T = TypeVar('T')
@@ -18,7 +19,7 @@ class Filter(Gen):
     pred: Callable[[Page], bool]
 
     def build(self, ctx: Context) -> Context:
-        return ctx.narrow(k for k, v in ctx.pages.items() if v and self.pred(v))
+        return ctx.narrow([k for k, v in ctx.pages.items() if v and self.pred(v)])
 
 @dataclass(init=False)
 class Seq(Gen):
@@ -43,6 +44,7 @@ class Alt(Gen):
 
     def build(self, ctx: Context): 
         for gen in self.args:
+            log.info('alternating...')
             ctx.update(gen.build(ctx))
         return ctx
 
@@ -93,6 +95,8 @@ class Tag(Gen):
     tag: str
     def build(self, ctx: Context) -> Context:
         ctx.tags[self.tag] = [p for p in ctx.pages.values() if p]
+        log.info('applied tag %s to %d pages', 
+            self.tag, len(ctx.tags[self.tag]))
         return ctx
 
 @dataclass
@@ -100,6 +104,7 @@ class GetTag(Gen):
     tag: str
     def build(self, ctx: Context) -> Context:
         pages = ctx.tags[self.tag]
+        log.info('fetching tag %s with %d pages', self.tag, len(pages))
         for p in ctx.pages.values():
             if p:
                 p.meta[self.tag] = pages
@@ -116,8 +121,10 @@ class Ap(Gen):
 class New(Gen):
     path: str | PurePath
     meta: dict[str, Any] = field(default_factory=dict)
+
     def build(self, ctx: Context) -> Context:
         p = PurePath(self.path)
         page = Page(p, p)
+        page.meta = dict(self.meta)
         ctx.add_page(page)
         return ctx

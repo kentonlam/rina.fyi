@@ -10,10 +10,10 @@ Alt(
         Map(Mako('t.html')),
         Tag('md')
     ),
-    Seq(
-        FilterExt('.png'),
-        PrintContext(),
-    ),
+    # Seq(
+    #     FilterExt('.png'),
+    #     PrintContext(),
+    # ),
     Seq(
         FilterExt('.asd'),
         New('asdf.html', {'title': 'asdf'}),

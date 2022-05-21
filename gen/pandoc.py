@@ -3,6 +3,7 @@ import json
 from pathlib import PurePath
 import shutil
 import subprocess
+from gen import log
 from gen.context import MODULE_PATH, Page
 
 def parse_date(s: str) -> date | datetime:
@@ -30,6 +31,8 @@ def parse_metadata(b: str) -> dict[str,str]:
     return parsed
 
 def Pandoc(p: Page) -> Page:
+    log.info('processing page with pandoc %s', p)
+
     pandoc = shutil.which('pandoc')
     assert pandoc, "pandoc could not be not found in PATH"
     

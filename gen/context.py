@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from urllib.parse import quote
 from gen.log import log
 from os import PathLike, makedirs
 from pathlib import Path, PurePath
@@ -15,6 +16,10 @@ class Page:
 
     data: bytes = field(default=b'', repr=False)
     meta: dict[str,Any] = field(default_factory=dict, repr=False)
+
+    def url(self) -> str:
+        assert self.output
+        return quote('/' + self.output.as_posix())
 
     def build(self, root: str | PathLike): 
         assert self.output, "attempt to build page with no defined output"

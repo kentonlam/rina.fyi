@@ -19,11 +19,11 @@ if (mathElements[i].tagName == "SPAN") {
 href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" />
 
 % if date and author:
-  posted on ${date} by ${author}.
+  <p>posted on ${date} by ${author}.</p>
 % elif date:
-  posted on ${date}.
+  <p>posted on ${date}.</p>
 % elif author:
-  posted by ${author}.
+  <p>posted by ${author}.</p>
 % endif
 
 

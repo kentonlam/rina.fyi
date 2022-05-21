@@ -1,13 +1,15 @@
 from gen import *
 
-c = Context.from_root('./gen/site')
+c = Context.from_root('./site')
 print(c)
 Alt(
     Seq(
         FilterExt('.md'),
-        # PrintContext(),
-        Map(Pandoc),
-        Map(Mako('t.html')),
+        Map(Pandoc)
+    ),
+    Seq(
+        FilterPath('p'),
+        Map(Mako('templates/post.html')),
         Tag('md')
     ),
     # Seq(
@@ -15,13 +17,13 @@ Alt(
     #     PrintContext(),
     # ),
     Seq(
-        FilterExt('.asd'),
-        New('asdf.html', {'title': 'asdf'}),
+        FilterExt(),
+        New('posts.html', {'title': 'Posts'}),
         GetTag('md'),
-        Map(Mako('post-list.html'))
+        Map(Mako('templates/post-list.html'))
     ),
     Seq(
         FilterExt('.html'),
-        Map(Mako('default.html'))
+        Map(Mako('templates/default.html'))
     ),
 ).build(c).write('build')

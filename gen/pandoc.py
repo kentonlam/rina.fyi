@@ -41,9 +41,9 @@ def Pandoc(p: Page) -> Page:
     )
 
     out, _ = proc.communicate(p.data)
-    print(out)
-    print()
-    print()
+    # print(out)
+    # print()
+    # print()
 
     parsed = parse_metadata(out.decode('utf-8'))
     p.data = parsed['body'].encode('utf-8')

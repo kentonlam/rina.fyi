@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import PurePath
-from typing import Callable, TypeVar, cast
+from typing import Any, Callable, TypeVar, cast
 from mako.template import Template
 
 from gen.context import Context, Page
@@ -87,3 +87,37 @@ def Print(f: Page) -> Page:
     print('found: ', f)
     return f
 
+
+@dataclass
+class Tag(Gen):
+    tag: str
+    def build(self, ctx: Context) -> Context:
+        ctx.tags[self.tag] = [p for p in ctx.pages.values() if p]
+        return ctx
+
+@dataclass
+class GetTag(Gen):
+    tag: str
+    def build(self, ctx: Context) -> Context:
+        pages = ctx.tags[self.tag]
+        for p in ctx.pages.values():
+            if p:
+                p.meta[self.tag] = pages
+        return ctx
+        
+
+@dataclass
+class Ap(Gen):
+    f: Callable[[Context], Context]
+    def build(self, ctx: Context) -> Context:
+        return self.f(ctx)
+
+@dataclass
+class New(Gen):
+    path: str | PurePath
+    meta: dict[str, Any] = field(default_factory=dict)
+    def build(self, ctx: Context) -> Context:
+        p = PurePath(self.path)
+        page = Page(p, p)
+        ctx.add_page(page)
+        return ctx

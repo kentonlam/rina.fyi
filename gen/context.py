@@ -16,7 +16,8 @@ class Page:
     meta: dict[str,Any] = field(default_factory=dict)
 
     def build(self, root: str | PathLike): 
-        if self.source and self.output:
+        assert self.output, "attempt to build page with no defined output"
+        if self.output:
             p = root / self.output
             makedirs(p.parent, exist_ok=True)
             with open(p, 'wb') as f:
@@ -35,26 +36,31 @@ class Page:
 class Context:
     pages: dict[str, Page | None] = field(default_factory=dict)
 
+    tags: dict[str, list[Page]] = field(default_factory=dict)
     # parent: 'Context' | None = None
+
+    def add_page(self, page: Page):
+        self.pages[str(page.source)] = page
 
     @classmethod
     def from_root(cls, root: str | PathLike) -> 'Context':
         p = Path(root)
-        pages: dict[str, Page | None] = {
-            str(f): Page.from_file(f, p)
-            for f in p.glob('**/*')
-            if f.is_file()
-        }
+        c = cls()
 
-        return cls(pages)
+        for f in p.glob('**/*'):
+            if not f.is_file(): continue
+            c.add_page(Page.from_file(f, p))
+
+        return c
 
     def update(self, other: 'Context'):
         self.pages.update(other.pages)
+        self.tags.update(other.tags)
 
     def narrow(self, keys: Iterable[str]) -> 'Context':
         new = Context(
             {k: self.pages[k] for k in keys}, 
-            # self
+            dict(self.tags)
         )
         return new
 

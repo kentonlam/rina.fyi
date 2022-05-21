@@ -12,6 +12,6 @@ def Mako(t: str) -> PageTransform:
         kwargs = p.__dict__ | p.meta
         kwargs['body'] = (kwargs['data'] or b'').decode('utf-8')
         p.data = cast(bytes, template.render(**kwargs))
-        print(p.data)
+        # print(p.data)
         return p
     return apply

@@ -2,7 +2,7 @@
 title: primitive and tail recursion
 date: 2022-05-15
 author: Rina
-excerpt: a comment on tail recursion, with particular attention to Haskell.
+description: a comment on tail recursion, with particular attention to Haskell.
 ---
 # primitive and tail recursion
 

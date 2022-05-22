@@ -8,6 +8,7 @@ import Lib
 import Hakyll
 import qualified Hakyll.Core.Configuration as Config
 
+makeEmpty = makeItem @String ""
 pandoc = pandocCompilerWith pandocReaderOptions pandocWriterOptions
 
 --------------------------------------------------------------------------------
@@ -21,7 +22,11 @@ config =
 main :: IO ()
 main = hakyllWith config $
   do
-    match ("CNAME" .||. "kumiko.*") $ do
+    create [".nojekyll"] $ do
+      route idRoute
+      compile makeEmpty
+
+    match (fromList ["CNAME", "kumiko.png"]) $ do
       route idRoute
       compile copyFileCompiler
 
@@ -64,7 +69,7 @@ main = hakyllWith config $
             -- t <- load "templates/post-list.html"
             -- s <- getMetadataField' "templates/post-list.html" "title"
             let ctx = metadataFrom "templates/post-list.html" <> archiveCtx
-            makeItem ""
+            makeEmpty
               >>= loadAndApplyTemplate "templates/post-list.html" ctx
               -- >>= loadAndApplyTemplate "templates/with-title.html" archiveCtx
               >>= loadAndApplyTemplate "templates/default.html" ctx

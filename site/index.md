@@ -2,7 +2,7 @@
 title: Home
 ---
 
-Hi there, you can call me Katrina or Kait. I'm a computer science + maths graduate just looking for _something_.
+Hi there, you can call me Katrina or Kait. I'm a computer science + maths graduate looking for _something_.
 
 Most of my experience is in &ldquo;modern&rdquo; web development but I'm more
 interested in compilers and programming language theory, as well as

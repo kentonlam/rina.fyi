@@ -63,11 +63,12 @@ main = hakyllWith config $
             -- load "templates/post-list.html"
             -- t <- load "templates/post-list.html"
             -- s <- getMetadataField' "templates/post-list.html" "title"
-            loadInitialTemplate "templates/post-list.html" archiveCtx
+            let ctx = metadataFrom "templates/post-list.html" <> archiveCtx
+            makeItem ""
+              >>= loadAndApplyTemplate "templates/post-list.html" ctx
               -- >>= loadAndApplyTemplate "templates/with-title.html" archiveCtx
-              >>= loadAndApplyTemplate "templates/default.html" archiveCtx
-              >>= makeItem . itemBody 
-    match "index.md" $
+              >>= loadAndApplyTemplate "templates/default.html" ctx
+    match "*.md" $
       do
         route $ setExtension "html"
         compile $
@@ -83,7 +84,7 @@ main = hakyllWith config $
         compile $ 
           getResourceBody
             >>= saveSnapshot "raw"
-            >>= compileTemplateItem 
+            >>= compileTemplateItem
             >>= makeItem
 
 --------------------------------------------------------------------------------

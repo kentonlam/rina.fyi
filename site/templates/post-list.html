@@ -1,0 +1,11 @@
+<ul>
+    $for(posts)$
+        <li>
+            <a href="$url$">$title$</a>
+            $if(description)$
+            &mdash;
+            $description$
+            $endif$
+        </li>
+    $endfor$
+</ul>

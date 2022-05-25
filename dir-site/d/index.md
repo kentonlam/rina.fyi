@@ -4,14 +4,9 @@ index.md
 # title: $title$
 
 ## files
-$for(files)$
-## $title$ - <a href="$url$">$url$</a> - $if(date)$ $date$ $endif$
-$body$
-$endfor$
+
 
 ## both
-$for(both)$
+$for(both-recent)$
 ## $title$ - <a href="$url$">$url$</a> - $if(date)$ $date$ $endif$
-$body$
-
 $endfor$

@@ -1,3 +1,7 @@
+---
+date: 2022-05-24
+---
+
 title: $title$
 
 $for(files)$

@@ -1,10 +1,10 @@
 ---
-title: this site itself
-date: 2022-05-22
-description: all about the site, the code behind it, and the story behind both.
+title: the site itself
+date: 2022-05-25
+description: all about this site, the code behind it, and the story behind both.
 ---
 
-# this site itself
+# the site itself
 
 Before we get started, the story is not that interesting. 
 I'm also not very good at remembering things once they've passed.

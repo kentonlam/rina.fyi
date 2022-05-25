@@ -3,13 +3,17 @@
 
 module Main where
 
+import Control.Monad
 
-import Lib
 import Hakyll
 import qualified Hakyll.Core.Configuration as Config
 
+import Dir
+import Lib
+
 makeEmpty = makeItem @String ""
-pandoc = pandocCompilerWith pandocReaderOptions pandocWriterOptions
+doPandoc = renderPandocWith pandocReaderOptions pandocWriterOptions 
+pandoc = pandocCompilerWith pandocReaderOptions pandocWriterOptions 
 
 --------------------------------------------------------------------------------
 config :: Config.Configuration
@@ -47,32 +51,38 @@ main = hakyllWith config $
     --         >>= loadAndApplyTemplate "templates/with-title.html" defaultContext
     --         >>= loadAndApplyTemplate "templates/default.html" defaultContext
     --         >>= relativizeUrls
-    match "p/assets/*" $ do
-      route idRoute
-      compile copyFileCompiler 
-    match "p/*.md" $
-      do
-        route $ setExtension "html"
-        compile $
-          pandoc
-            >>= loadAndApplyTemplate "templates/post.html" postCtx
-            -- >>= loadAndApplyTemplate "templates/with-title.html" postCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
-            -- >>= relativizeUrls
-    create ["posts.html"] $
-      do
-        route idRoute
-        compile $
-          do
-            archiveCtx <- listCtx <$> (recentFirst =<< loadAll "p/*.md")
-            -- load "templates/post-list.html"
-            -- t <- load "templates/post-list.html"
-            -- s <- getMetadataField' "templates/post-list.html" "title"
-            let ctx = metadataFrom "templates/post-list.html" <> archiveCtx
-            makeEmpty
-              >>= loadAndApplyTemplate "templates/post-list.html" ctx
-              -- >>= loadAndApplyTemplate "templates/with-title.html" archiveCtx
-              >>= loadAndApplyTemplate "templates/default.html" ctx
+    -- match "p/assets/*" $ do
+    --   route idRoute
+    --   compile copyFileCompiler 
+    -- match "p/*.md" $
+    --   do
+    --     route $ setExtension "html"
+    --     compile $
+    --       pandoc
+    --         >>= loadAndApplyTemplate "templates/post.html" postCtx
+    --         -- >>= loadAndApplyTemplate "templates/with-title.html" postCtx
+    --         >>= loadAndApplyTemplate "templates/default.html" postCtx
+    --         -- >>= relativizeUrls
+    dir "p" postCtx
+      (doPandoc
+        >=> loadAndApplyTemplate "templates/default.html" postCtx)
+      (doPandoc
+        >=> loadAndApplyTemplate "templates/post.html" postCtx
+        >=> loadAndApplyTemplate "templates/default.html" postCtx)
+    -- create ["posts.html"] $
+    --   do
+    --     route idRoute
+    --     compile $
+    --       do
+    --         archiveCtx <- listCtx <$> (recentFirst =<< loadAll "p/*.md")
+    --         -- load "templates/post-list.html"
+    --         -- t <- load "templates/post-list.html"
+    --         -- s <- getMetadataField' "templates/post-list.html" "title"
+    --         let ctx = metadataFrom "templates/post-list.html" <> archiveCtx
+    --         makeEmpty
+    --           >>= loadAndApplyTemplate "templates/post-list.html" ctx
+    --           -- >>= loadAndApplyTemplate "templates/with-title.html" archiveCtx
+    --           >>= loadAndApplyTemplate "templates/default.html" ctx
     match "*.md" $
       do
         route $ setExtension "html"

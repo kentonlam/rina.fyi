@@ -39,12 +39,11 @@ executables:
     - cryptonite
     - pandoc
 
-  rina-dir:
-    main:                Main.hs
-    source-dirs:         dir
-    dependencies:
-    # - rina
-    - hakyll
+  # rina-dir:
+  #   main:                Main.hs
+  #   source-dirs:         dir
+  #   dependencies:
+  #   - hakyll
 
 # tests:
 #   rina-test:

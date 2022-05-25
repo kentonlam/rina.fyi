@@ -39,7 +39,7 @@ sortOptions ctx k items = do
   where lf k f = listField k ctx (pure f)
 
 
-dir :: String -> Context String -> (Item String -> Compiler (Item String)) -> (Item String -> Compiler (Item String)) -> Rules ()
+dir :: FilePath -> Context String -> (Item String -> Compiler (Item String)) -> (Item String -> Compiler (Item String)) -> Rules ()
 dir p c indexCont postCont = do
   match (p /**?/ "index.md") $ 
     do
@@ -47,15 +47,10 @@ dir p c indexCont postCont = do
       compile $ 
         do
           (files, dirs, both) <- loadAdj =<< getUnderlying
-          -- let f' = filter ((/= f) . toFilePath . itemIdentifier) files
-          -- unsafeCompiler $ print files
-          -- [Compiler (Context a)]
           lists <- fold <$> sequence [sortOptions c "files" files, sortOptions c "dirs" dirs, sortOptions c "both" both]
-          -- let lf k f = listField k postCtx (pure f)
           getResourceBody 
             >>= applyAsTemplate (lists <> c)
             >>= indexCont
-          -- makeItem $ f
   match (p /**?/ "*.md") $
     do
       route $ setExtension "html"

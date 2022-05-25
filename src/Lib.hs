@@ -8,15 +8,20 @@ import Hakyll
 import Text.Pandoc.Options
 
 
+exts = Ext_autolink_bare_uris .+ Ext_smart .+ pandocExtensions
+  where 
+    (.+) = enableExtension
+    infixr 2 .+
+
 pandocReaderOptions :: ReaderOptions
 pandocReaderOptions = def {
-    readerExtensions = Ext_smart `enableExtension` pandocExtensions,
+    readerExtensions = exts,
     readerStandalone = True
 }
 
 pandocWriterOptions :: WriterOptions
 pandocWriterOptions = def { 
-    writerExtensions = Ext_smart `enableExtension` pandocExtensions,
+    writerExtensions = exts,
     writerHTMLMathMethod = KaTeX defaultKaTeXURL,
     writerTableOfContents = True,
     writerWrapText = WrapPreserve

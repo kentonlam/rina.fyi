@@ -1,5 +1,5 @@
 title: $title$
 
-$for(list)$
+$for(files)$
 1. $title$ - <a href="$url$">$url$</a>
 $endfor$

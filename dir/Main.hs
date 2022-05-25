@@ -22,8 +22,15 @@ recGlob p f = fromGlob (p <> "/**/" <> f) .||. fromGlob (p <> "/" <> f)
 d /./ f = fromGlob (d <> "/" <> f)
 d /*/ f = fromGlob (d <> "/*/" <> f)
 
+notIden :: Identifier -> Pattern
+notIden = complement . fromList . pure
+
 adjFiles :: Identifier -> Pattern
-adjFiles i = (d /./ "*.md" .||. d /*/ "index.md") .&&. complement (fromList [i])
+adjFiles i = d /./ "*.md" .&&. notIden i
+  where d = dirname (toFilePath i)
+
+adjDirs :: Identifier -> Pattern
+adjDirs i = d /*/ "index.md" .&&. notIden i 
   where d = dirname (toFilePath i)
 
 dir :: String -> Rules ()
@@ -33,12 +40,18 @@ dir p = do
       route $ setExtension "html"
       compile $ 
         do
-          adj <- adjFiles <$> getUnderlying
-          files <- loadAll (adj)
+          i <- getUnderlying
+
+          files <- loadAll (adjFiles i)
+          dirs <- loadAll (adjDirs i)
+          both <- loadAll (adjFiles i .||. adjDirs i)
           -- let f' = filter ((/= f) . toFilePath . itemIdentifier) files
           -- unsafeCompiler $ print files
+
+          let lf k f = listField k postCtx (pure f)
+          let ctx = lf "both" both <> lf "dirs" dirs <> lf "files" files <> postCtx
           getResourceBody 
-            >>= applyAsTemplate (listCtx files)
+            >>= applyAsTemplate ctx
             >>= renderPandoc
           -- makeItem $ f
   match (p /**?/ "*.md") $
@@ -64,7 +77,7 @@ main = hakyllWith config (dir "d")
 dirname :: FilePath -> FilePath
 dirname = reverse . dropWhile (== '/') . dropWhile (/= '/') . reverse
 
-postCtx = defaultContext
+postCtx = dateField "date" "%F" <> defaultContext
 
 listCtx :: [Item String] -> Context String
 listCtx items = listField "list" postCtx (pure items) <> postCtx

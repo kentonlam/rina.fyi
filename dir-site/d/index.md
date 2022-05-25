@@ -3,9 +3,15 @@ index.md
 
 # title: $title$
 
-$for(list)$
-## $title$ - <a href="$url$">$url$</a>
+## files
+$for(files)$
+## $title$ - <a href="$url$">$url$</a> - $if(date)$ $date$ $endif$
+$body$
+$endfor$
 
+## both
+$for(both)$
+## $title$ - <a href="$url$">$url$</a> - $if(date)$ $date$ $endif$
 $body$
 
 $endfor$

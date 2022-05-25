@@ -15,9 +15,6 @@ d /**?/ f = fromGlob (d <> "/**/" <> f) .||. fromGlob (d <> "/" <> f)
 d /./ f = fromGlob (d <> "/" <> f)
 d /*/ f = fromGlob (d <> "/*/" <> f)
 
-dirname :: FilePath -> FilePath
-dirname = reverse . dropWhile (== '/') . dropWhile (/= '/') . reverse
-
 
 notIden :: Identifier -> Pattern
 notIden = complement . fromList . pure
@@ -55,9 +52,8 @@ dir p c indexCont postCont = do
           -- [Compiler (Context a)]
           lists <- fold <$> sequence [sortOptions c "files" files, sortOptions c "dirs" dirs, sortOptions c "both" both]
           -- let lf k f = listField k postCtx (pure f)
-          let ctx = lists <> c
           getResourceBody 
-            >>= applyAsTemplate ctx
+            >>= applyAsTemplate (lists <> c)
             >>= indexCont
           -- makeItem $ f
   match (p /**?/ "*.md") $
@@ -70,18 +66,5 @@ dir p c indexCont postCont = do
     do
       route idRoute
       compile copyFileCompiler
-
-  -- match (p /**?/ "*.md") $
-  --   do 
-  --     route $ setExtension "html"
-  --     compile $ 
-  --       do
-  --         i <- getUnderlying
-  --         item <- load (setVersion (Just "dir") i) :: Compiler (Item String)
-  --         makeItem $ itemBody item
-  -- create ["index.md"] $
-  --   do
-  --     route $ setExtension "html"
-  --     compile $ makeItem ("make"::String)
 
 -- main = hakyllWith config (dir "d")

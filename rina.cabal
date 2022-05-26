@@ -27,6 +27,7 @@ executable rina-exe
   other-modules:
       Dir
       Lib
+      Pandoc
       Paths_rina
   hs-source-dirs:
       src
@@ -36,4 +37,6 @@ executable rina-exe
     , cryptonite
     , hakyll
     , pandoc
+    , pandoc-types
+    , text
   default-language: Haskell2010

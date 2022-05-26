@@ -34,3 +34,11 @@ figure {
 figure > img {
   width: 100%;
 }
+
+
+.anchor {
+  font-size: 75%;
+  color: black;
+  opacity: 0.4;
+  text-decoration: none;
+}

@@ -1,3 +1,5 @@
 {
-    "liveServer.settings.root": "/docs"
+    "liveServer.settings.root": "/docs",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true
 }

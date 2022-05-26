@@ -9,6 +9,7 @@ import qualified Hakyll.Core.Configuration as Config
 
 import Dir
 import Lib
+import Pandoc
 
 
 --------------------------------------------------------------------------------

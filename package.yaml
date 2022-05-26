@@ -38,6 +38,8 @@ executables:
     - hakyll
     - cryptonite
     - pandoc
+    - pandoc-types
+    - text
 
   # rina-dir:
   #   main:                Main.hs

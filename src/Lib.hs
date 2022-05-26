@@ -4,34 +4,10 @@ module Lib where
 
 import Data.List
 
+
 import Hakyll
-import Text.Pandoc.Options
-
-
-exts = Ext_autolink_bare_uris .+ Ext_smart .+ pandocExtensions
-  where 
-    (.+) = enableExtension
-    infixr 2 .+
-
-pandocReaderOptions :: ReaderOptions
-pandocReaderOptions = def {
-    readerExtensions = exts,
-    readerStandalone = True
-}
-
-pandocWriterOptions :: WriterOptions
-pandocWriterOptions = def { 
-    writerExtensions = exts,
-    writerHTMLMathMethod = KaTeX defaultKaTeXURL,
-    writerTableOfContents = True,
-    writerWrapText = WrapPreserve
-}
-
-doPandoc = renderPandocWith pandocReaderOptions pandocWriterOptions 
-pandoc = pandocCompilerWith pandocReaderOptions pandocWriterOptions 
 
 makeEmpty = makeItem @String ""
-
 
 copyRule = do
   route idRoute

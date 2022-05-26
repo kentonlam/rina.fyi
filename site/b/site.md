@@ -1,6 +1,7 @@
 ---
 title: the site itself
 date: 2022-05-25
+author: Rina
 description: all about this site, the code behind it, and the story behind both.
 ---
 
@@ -132,7 +133,7 @@ with much less code that makes me want to cry.
 
 What's more, it was easy and practical to build on top of. 
 One enhancement was taking the structure from the directory and using that
-to generate lsits of posts and subfolders. 
+to generate lists of posts and subfolders. 
 This was easy with its automatic dependency tracking and resolution. 
 The generic function to do this is here:
 ```haskell

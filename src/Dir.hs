@@ -40,7 +40,12 @@ sortOptions ctx k items = do
   where lf k f = listField k ctx f
 
 
-dir :: FilePath -> Context String -> (Item String -> Compiler (Item String)) -> (Item String -> Compiler (Item String)) -> Rules ()
+dir ::
+  FilePath
+  -> Context String
+  -> (Item String -> Compiler (Item String))
+  -> (Item String -> Compiler (Item String))
+  -> Rules ()
 dir p c indexCont postCont = do
   match (p /**?/ "index.md") $
     do
@@ -48,7 +53,8 @@ dir p c indexCont postCont = do
       compile $
         do
           (files, dirs, both) <- loadAdj =<< getUnderlying
-          lists <- fold <$> sequence [sortOptions c "files" files, sortOptions c "dirs" dirs, sortOptions c "both" both]
+          lists <- fold <$> traverse (uncurry $ sortOptions c)
+            [("files", files), ("dirs", dirs), ("both", both)]
           getResourceBody
             >>= applyAsTemplate (lists <> c)
             >>= indexCont

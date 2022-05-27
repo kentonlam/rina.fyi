@@ -24,7 +24,7 @@ adjFiles i = d /./ "*.md" .&&. notIden i
   where d = dirname (toFilePath i)
 
 adjDirs :: Identifier -> Pattern
-adjDirs i = d /*/ "index.md" .&&. notIden i 
+adjDirs i = d /*/ "index.md" .&&. notIden i
   where d = dirname (toFilePath i)
 
 loadAdj :: Identifier -> Compiler ([Item String], [Item String], [Item String])
@@ -33,28 +33,29 @@ loadAdj i = (,,) <$> l (adjFiles i) <*> l (adjDirs i) <*> l (adjFiles i .||. adj
 
 sortOptions :: Context String -> String -> [Item String] -> Compiler (Context String)
 sortOptions ctx k items = do
-  recent <- recentFirst items
-  chrono <- chronological items
-  pure $ lf k items <> lf (k <> "-recent") recent <> lf (k <> "-chrono") chrono
-  where lf k f = listField k ctx (pure f)
+  let
+    recent = recentFirst items
+    chrono = chronological items
+  pure $ lf k (pure items) <> lf (k <> "-recent") recent <> lf (k <> "-chrono") chrono
+  where lf k f = listField k ctx f
 
 
 dir :: FilePath -> Context String -> (Item String -> Compiler (Item String)) -> (Item String -> Compiler (Item String)) -> Rules ()
 dir p c indexCont postCont = do
-  match (p /**?/ "index.md") $ 
+  match (p /**?/ "index.md") $
     do
       route $ setExtension "html"
-      compile $ 
+      compile $
         do
           (files, dirs, both) <- loadAdj =<< getUnderlying
           lists <- fold <$> sequence [sortOptions c "files" files, sortOptions c "dirs" dirs, sortOptions c "both" both]
-          getResourceBody 
+          getResourceBody
             >>= applyAsTemplate (lists <> c)
             >>= indexCont
   match (p /**?/ "*.md") $
     do
       route $ setExtension "html"
-      compile $ getResourceBody 
+      compile $ getResourceBody
         >>= postCont
 
   match (p /**?/ "*" .&&. complement (p /**?/ "*.md")) $

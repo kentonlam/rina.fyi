@@ -32,12 +32,16 @@ main = hakyllWith config $
   do
     create [".nojekyll"] makeEmptyRule
 
-    match (fromList ["CNAME", "kumiko.png"]) copyRule
     match "css/*" copyRule
 
     dir "p" context indexCont postCont
     dir "b" context indexCont postCont
-    
+
+    match "root/*" $
+      do
+        route $ gsubRoute "root/" (const "")
+        compile $ copyFileCompiler
+
     match "*.md" $
       do
         route $ setExtension "html"
@@ -46,9 +50,9 @@ main = hakyllWith config $
             pandoc
               >>= loadAndApplyTemplate "templates/default.html" context
 
-    match "templates/*" $ 
+    match "templates/*" $
       do
-        compile $ 
+        compile $
           getResourceBody
             >>= saveSnapshot "raw"
             >>= compileTemplateItem

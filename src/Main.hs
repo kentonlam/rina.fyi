@@ -26,6 +26,7 @@ postCont = doPandoc
   >=> loadAndApplyTemplate "templates/post.html" context
   >=> loadAndApplyTemplate "templates/default.html" context
 
+base = "rina.fyi"
 
 main :: IO ()
 main = hakyllWith config $
@@ -58,3 +59,14 @@ main = hakyllWith config $
             >>= compileTemplateItem
             >>= makeItem
 
+    create ["CNAME"] $ makeTextRule base
+    create ["sitemap.txt"] $
+      do
+        route idRoute
+        compile $
+          do
+            let ctx = listField "files"
+                      (constField "base" base <> context)
+                      (loadAll ("*.md" .||. "**/*.md"))
+            makeEmpty
+              >>= loadAndApplyTemplate "templates/sitemap.txt" ctx

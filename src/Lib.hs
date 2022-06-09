@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Lib where
 
 import Data.List
@@ -7,16 +5,19 @@ import Data.List
 
 import Hakyll
 
-makeEmpty = makeItem @String ""
+makeEmpty = makeItem (""::String)
 
 copyRule = do
   route idRoute
   compile copyFileCompiler
 
-makeEmptyRule = do
+makeTextRule :: String -> Rules ()
+makeTextRule s = do
   route idRoute
-  compile makeEmpty
-  
+  compile (makeItem s)
+
+makeEmptyRule = makeTextRule ""
+
 
 (.<>) :: (Context a -> Context a) -> Context a -> Context a
 f .<> c = f c <> c
@@ -24,9 +25,9 @@ f .<> c = f c <> c
 infixr 5 .<>
 
 context :: Context String
-context = mapField2 "title" cleanTitle 
-  .<> mapField "url" cleanURL 
-  .<> dateField "date" "%F" 
+context = mapField2 "title" cleanTitle
+  .<> mapField "url" cleanURL
+  .<> dateField "date" "%F"
   <> defaultContext
 
 matchString :: ContextField -> Compiler String
@@ -64,8 +65,16 @@ basename :: FilePath -> FilePath
 basename = reverse . takeWhile (/= '/') . reverse
 
 trimSuffix :: String -> String -> String
-trimSuffix suf s = maybe s r $ stripPrefix (r suf) (r s)
-    where r = reverse
+trimSuffix suf = replaceSuffix suf ""
+
+replaceSuffix :: String -> String -> String -> String
+replaceSuffix suf rep s = maybe s (++ rep) $ r <$> stripPrefix (r suf) (r s)
+  where r = reverse
+
+replace :: Eq a => a -> a -> a -> a
+replace old new s
+  | s == old = new
+  | otherwise = s
 
 cleanURL :: String -> String
-cleanURL = trimSuffix ".html" . trimSuffix "/index.html"
+cleanURL = replace "/" "" . trimSuffix ".html" . replaceSuffix "/index.html" "/"

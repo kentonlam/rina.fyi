@@ -1,0 +1,2 @@
+$for(files)$$base$$url$
+$endfor$

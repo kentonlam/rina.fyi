@@ -1,8 +1,8 @@
-rina.fyi/404
-rina.fyi/b/
-rina.fyi/b/site-addendum
-rina.fyi/b/site
-rina.fyi
-rina.fyi/p/
-rina.fyi/p/primrec
+https://rina.fyi/404
+https://rina.fyi/b/
+https://rina.fyi/b/site-addendum
+https://rina.fyi/b/site
+https://rina.fyi
+https://rina.fyi/p/
+https://rina.fyi/p/primrec
 

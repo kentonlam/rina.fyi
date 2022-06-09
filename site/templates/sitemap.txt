@@ -1,2 +1,2 @@
-$for(files)$$base$$url$
+$for(files)$https://$base$$url$
 $endfor$

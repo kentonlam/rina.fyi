@@ -38,7 +38,7 @@ main = hakyllWith config $
     dir "p" context indexCont postCont
     dir "b" context indexCont postCont
 
-    match "root/*" $
+    match ("root" /**?/ "*") $
       do
         route $ gsubRoute "root/" (const "")
         compile $ copyFileCompiler

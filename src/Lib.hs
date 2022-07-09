@@ -1,7 +1,7 @@
 module Lib where
 
+import Control.Monad
 import Data.List
-
 
 import Hakyll
 
@@ -39,11 +39,14 @@ matchString f = case f of
     wrongType typ = fail $ "matchString: " ++
         "expected StringField but got " ++ typ ++ "!"
 
+getStringField :: String -> Context a -> Item a -> Compiler String
+getStringField k c = unContext c k [] >=> matchString
+
 mapField :: String -> (String -> String) -> Context a -> Context a
-mapField k f c = field k (\i -> unContext c k [] i >>= matchString >>= pure . f)
+mapField k f c = mapField2 k (const f) c
 
 mapField2 :: String -> (Item a -> String -> String) -> Context a -> Context a
-mapField2 k f c = field k (\i -> unContext c k [] i >>= matchString >>= pure . f i)
+mapField2 k f c = field k (\i -> f i <$> getStringField k c i)
 
 
 itemPath :: Item a -> FilePath

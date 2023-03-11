@@ -13,7 +13,7 @@ We were given the claim that "any primitive recursive function is tail recursive
 A primitive recursive function is defined inductively as a function $f : B \to \mathbb N \to A$ which can be written in the following form.
 $$
 \begin{aligned}
-f(b,0) &= f_0(b) \\ 
+f(b,0) &= f_0(b) \\
 f(b, \operatorname {Suc} n) &= f_s(b,n, f(b,n))
 \end{aligned}
 $$
@@ -75,7 +75,7 @@ tl ::
 		Int -> 			-- n of current call
 		([b] -> a) ->	-- result of recursive subcall (?)
 		a				-- result of combining
-    ) -> 
+    ) ->
     ([b] -> a) -> 	-- f_0 function
     Int -> 			-- natural number to evaluate function at
     a				-- result of tail recursive function
@@ -93,14 +93,14 @@ tailrec' b fs f0 0 = f0 b
 tailrec' b fs f0 n = tailrec' bs fs (\b -> fs b (n-1) (f0 b)) (n-1)
 ```
 
-Additionally, we should be able to write this version with `[b]` using just `tailrec` and partially applying functions. 
+Additionally, we should be able to write this version with `[b]` using just `tailrec` and partially applying functions.
 
 ```haskell
 tailrec'' :: [b] -> ([b] -> Int -> a -> a) -> ([b] -> a) -> Int -> a
 tailrec'' bs fs f0 n = tailrec (fs bs) (f0 bs) n
 ```
 
-It is easy to see the types match up and hence the function is (obviously) correct. 
+It is easy to see the types match up and hence the function is (obviously) correct.
 
 ### examples
 
@@ -126,14 +126,14 @@ We will skip looking at each example in detail. Some notes:
 We return to our original definition of a primitive recursive function $f : B \to \mathbb N \to A$.
 $$
 \begin{aligned}
-f(b,0) &= f_0(b) \\ 
+f(b,0) &= f_0(b) \\
 f(b, \operatorname {Suc} n) &= f_s(b,n, f(b,n))
 \end{aligned}
 $$
 In fact, we will remove the $b$ parameter by assuming partial application is possible. Now, we have $f : \mathbb N \to A$. The $B$ parameter is also removed from $f_0$ and $f_s$.
 $$
 \begin{aligned}
-f(0) &= f_0 \\ 
+f(0) &= f_0 \\
 f(\operatorname {Suc} n) &= f_s(n, f(n))
 \end{aligned}
 $$
@@ -193,7 +193,7 @@ These are some more notes which link this notion of "recursion" with some other 
 
 The different evaluation order of `primrec` and `tailrec` given above corresponds to the two directions of folding. Specifically, you can `foldr` which combines the first element with the recursive subresult, or `foldl` which combines the recursive subresult with the last element.
 
-To highlight this point, I would've liked to write a Foldable instance for Int but unfortunately we can't do that because Foldable needs a higher order type (for example, you say `Foldable []` to say `[a]` is foldable for all `a`). 
+To highlight this point, I would've liked to write a Foldable instance for Int but unfortunately we can't do that because Foldable needs a higher order type (for example, you say `Foldable []` to say `[a]` is foldable for all `a`).
 
 Instead, we observe that the recursive evaluation passes decreasing integers to the `f_s` function. With this in mind, we will convert integers to a list the fold over that list!
 
@@ -251,7 +251,7 @@ import Data.Time.Clock
 time :: IO () -> IO ()
 time f = do
   putStrLn "start..."
-  t0 <- getCurrentTime  
+  t0 <- getCurrentTime
   f
   t1 <- getCurrentTime
   putStr "... end in "
@@ -331,13 +331,34 @@ In Martin-Löf Type Theory, types are defined by specifying four sets of rules:
 
 This notion of primitive recursion is so pervasive that it turns up as the elimination rule for natural numbers. Here, $p_0$ and $p_S$ are analogous to $f_0$ and $f_s$ in our definition. $\Pi$ defines a dependent function taking an argument $n : \mathbb N$.
 
-![image-20220514193026842](assets\image-20220514193026842.png)
+$$
+\frac{\begin{align*}
+\Gamma, n : \mathbb N &\vdash P(n) \text{ type} \\
+\Gamma&\vdash p_0 : P(0_{\mathbb N}) \\
+\Gamma &\vdash p_S : \Pi_{(n : \mathbb N)}(P(n) \to P(\operatorname{succ}_{\mathbb N}(n)))
+\end{align*}
+}{
+\Gamma \vdash \operatorname{ind}_{\mathbb N}(p_0, p_S) : \Pi_{(n : \mathbb N)} P(n)
+}
+\mathbb N\text{-ind}
+$$
 
 Moreover, the computation rules specify that it behaves identically to the primitive recursive definition. First for the base case,
-
-![image-20220514193226724](assets\image-20220514193226724.png)
+$$
+\frac{\begin{align*}
+\Gamma, n : \mathbb N &\vdash P(n) \text{ type} \\
+\Gamma&\vdash p_0 : P(0_{\mathbb N}) \\
+\Gamma &\vdash p_S : \Pi_{(n : \mathbb N)}(P(n) \to P(\operatorname{succ}_{\mathbb N}(n)))
+\end{align*}
+}{
+\Gamma \vdash \operatorname{ind}_{\mathbb N}(p_0, p_S, 0_{\mathbb N})~\dot=~ p_0 : P(0_{\mathbb N})
+}
+$$
 
 and also the inductive case,
-
-![image-20220514193236752](assets\image-20220514193236752.png)
-
+$$
+\frac{\cdots}{
+\Gamma, n : \mathbb N \vdash \operatorname{ind}_{\mathbb N}(p_0, p_S, \operatorname{succ}_{\mathbb N}(n))~\dot=~
+p_S(n, \operatorname{ind}_{\mathbb N}(p_0, p_S, n)) : P(\operatorname{succ}_{\mathbb N}(n))
+}.
+$$

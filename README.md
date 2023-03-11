@@ -1,1 +1,15 @@
 # rina
+
+This site is built with Hakyll, with package management by Haskell's stack tool.
+It should be sufficient to run
+```bash
+stack build
+```
+to initialise the project and its dependencies.
+The first time, this will take a while because of Pandoc.
+
+Once built, Hakyll is used by executing the built binary (unlike other tools which use a separate external tool, the Hakyll compiler is this binary itself).
+```bash
+stack run
+```
+should suffice.

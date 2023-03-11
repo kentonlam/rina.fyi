@@ -66,7 +66,7 @@
 <p>A primitive recursive function is defined inductively as a function <span class="math inline">f : B \to \mathbb N \to A</span> which can be written in the following form.
 <span class="math display">
 \begin{aligned}
-f(b,0) &amp;= f_0(b) \\ 
+f(b,0) &amp;= f_0(b) \\
 f(b, \operatorname {Suc} n) &amp;= f_s(b,n, f(b,n))
 \end{aligned}
 </span></p>
@@ -101,7 +101,7 @@ f(b, \operatorname {Suc} n) &amp;= f_s(b,n, f(b,n))
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>		<span class="dt">Int</span> <span class="ot">-&gt;</span> 			<span class="co">-- n of current call</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>		([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span>	<span class="co">-- result of recursive subcall (?)</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>		a				<span class="co">-- result of combining</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="ot">-&gt;</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="ot">-&gt;</span></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    ([b] <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> 	<span class="co">-- f_0 function</span></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Int</span> <span class="ot">-&gt;</span> 			<span class="co">-- natural number to evaluate function at</span></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    a				<span class="co">-- result of tail recursive function</span></span></code></pre></div>
@@ -133,14 +133,14 @@ f(b, \operatorname {Suc} n) &amp;= f_s(b,n, f(b,n))
 <p>We return to our original definition of a primitive recursive function <span class="math inline">f : B \to \mathbb N \to A</span>.
 <span class="math display">
 \begin{aligned}
-f(b,0) &amp;= f_0(b) \\ 
+f(b,0) &amp;= f_0(b) \\
 f(b, \operatorname {Suc} n) &amp;= f_s(b,n, f(b,n))
 \end{aligned}
 </span>
 In fact, we will remove the <span class="math inline">b</span> parameter by assuming partial application is possible. Now, we have <span class="math inline">f : \mathbb N \to A</span>. The <span class="math inline">B</span> parameter is also removed from <span class="math inline">f_0</span> and <span class="math inline">f_s</span>.
 <span class="math display">
 \begin{aligned}
-f(0) &amp;= f_0 \\ 
+f(0) &amp;= f_0 \\
 f(\operatorname {Suc} n) &amp;= f_s(n, f(n))
 \end{aligned}
 </span>
@@ -208,7 +208,7 @@ fs (0) (fs (1) (fs (2) (f0)))</code></pre>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="ot">time ::</span> <span class="dt">IO</span> () <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>time f <span class="ot">=</span> <span class="kw">do</span></span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStrLn</span> <span class="st">&quot;start...&quot;</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> getCurrentTime  </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> getCurrentTime</span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  f</span>
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  t1 <span class="ot">&lt;-</span> getCurrentTime</span>
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">putStr</span> <span class="st">&quot;... end in &quot;</span></span>
@@ -258,20 +258,35 @@ start...
 <li>computation rules relate the introduction and elimination rules.</li>
 </ul>
 <p>This notion of primitive recursion is so pervasive that it turns up as the elimination rule for natural numbers. Here, <span class="math inline">p_0</span> and <span class="math inline">p_S</span> are analogous to <span class="math inline">f_0</span> and <span class="math inline">f_s</span> in our definition. <span class="math inline">\Pi</span> defines a dependent function taking an argument <span class="math inline">n : \mathbb N</span>.</p>
-<figure>
-<img src="assets\image-20220514193026842.png" alt="image-20220514193026842" />
-<figcaption aria-hidden="true">image-20220514193026842</figcaption>
-</figure>
-<p>Moreover, the computation rules specify that it behaves identically to the primitive recursive definition. First for the base case,</p>
-<figure>
-<img src="assets\image-20220514193226724.png" alt="image-20220514193226724" />
-<figcaption aria-hidden="true">image-20220514193226724</figcaption>
-</figure>
-<p>and also the inductive case,</p>
-<figure>
-<img src="assets\image-20220514193236752.png" alt="image-20220514193236752" />
-<figcaption aria-hidden="true">image-20220514193236752</figcaption>
-</figure>
+<p><span class="math display">
+\frac{\begin{align*}
+\Gamma, n : \mathbb N &amp;\vdash P(n) \text{ type} \\
+\Gamma&amp;\vdash p_0 : P(0_{\mathbb N}) \\
+\Gamma &amp;\vdash p_S : \Pi_{(n : \mathbb N)}(P(n) \to P(\operatorname{succ}_{\mathbb N}(n)))
+\end{align*}
+}{
+\Gamma \vdash \operatorname{ind}_{\mathbb N}(p_0, p_S) : \Pi_{(n : \mathbb N)} P(n)
+}
+\mathbb N\text{-ind}
+</span></p>
+<p>Moreover, the computation rules specify that it behaves identically to the primitive recursive definition. First for the base case,
+<span class="math display">
+\frac{\begin{align*}
+\Gamma, n : \mathbb N &amp;\vdash P(n) \text{ type} \\
+\Gamma&amp;\vdash p_0 : P(0_{\mathbb N}) \\
+\Gamma &amp;\vdash p_S : \Pi_{(n : \mathbb N)}(P(n) \to P(\operatorname{succ}_{\mathbb N}(n)))
+\end{align*}
+}{
+\Gamma \vdash \operatorname{ind}_{\mathbb N}(p_0, p_S, 0_{\mathbb N})~\dot=~ p_0 : P(0_{\mathbb N})
+}
+</span></p>
+<p>and also the inductive case,
+<span class="math display">
+\frac{\cdots}{
+\Gamma, n : \mathbb N \vdash \operatorname{ind}_{\mathbb N}(p_0, p_S, \operatorname{succ}_{\mathbb N}(n))~\dot=~
+p_S(n, \operatorname{ind}_{\mathbb N}(p_0, p_S, n)) : P(\operatorname{succ}_{\mathbb N}(n))
+}.
+</span></p>
 
 
         </main>

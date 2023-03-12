@@ -14,7 +14,7 @@ import qualified Data.Text as T
 import Hakyll
 
 extensions = Ext_autolink_bare_uris .+ Ext_smart .+ pandocExtensions
-  where 
+  where
     (.+) = enableExtension
     infixr 2 .+
 
@@ -25,7 +25,7 @@ pandocReaderOptions = def {
 }
 
 pandocWriterOptions :: WriterOptions
-pandocWriterOptions = def { 
+pandocWriterOptions = def {
     writerExtensions = extensions,
     writerHTMLMathMethod = KaTeX defaultKaTeXURL,
     writerTableOfContents = True,
@@ -33,11 +33,11 @@ pandocWriterOptions = def {
 }
 
 anchorLinks :: Block -> Block
-anchorLinks a@(Header l attrs@(i,_,_) text) | not (T.null i) = 
+anchorLinks a@(Header l attrs@(i,_,_) text) | not (T.null i) =
   Header l attrs (text ++ [Space, link])
-  where 
-    link = Link 
-      ("", ["anchor"], [("aria-hidden", "true")]) 
+  where
+    link = Link
+      ("", ["anchor"], [("aria-hidden", "true")])
       [Str "#"]
       ("#" <> i, "")
 anchorLinks x = x

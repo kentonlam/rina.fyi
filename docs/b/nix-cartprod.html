@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>cartesian product (nix flavour) &mdash; Kait Lam</title>
+        <link rel="stylesheet" href="/css/default.css" />
+        <link rel="stylesheet" href="/css/code.css" />
+        <!-- <link rel="stylesheet" href="/css/pandoc.css" /> -->
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <meta name="theme-color" content="#885038">
+    </head>
+    <body>
+        <header id="top">
+            <a href="/">
+                <img src="/kumiko.png" style="float: left" id="icon"/>
+            </a>
+            <div>
+                <h1>Kait Lam</h1>
+                <nav>
+                    <a href="/">home</a>
+                    &ensp;<a href="/p">posts</a>
+                    &ensp;<a href="/b">blog</a>
+                    <!-- | <a href="/about.html">about</a> -->
+                    <!-- | <a href="/contact.html">contact</a> -->
+                    <!-- | <a href="/archive.html">archive</a> -->
+                </nav>
+            </div>
+        </header>
+
+        <main role="main">
+            <script defer="" src="https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var mathElements = document.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  });
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.css" />
+
+
+
+  
+    <p>posted on 2023-06-14 by Kait.</p>
+  
+
+
+
+<h1 id="cartesian-product-nix-flavour">cartesian product (nix flavour) <a href="#cartesian-product-nix-flavour" class="anchor" aria-hidden="true">#</a></h1>
+<p>The set theoretic <a href="https://en.wikipedia.org/wiki/Cartesian_product">Cartesian product</a> of two sets is the set of pairs. This is written
+<span class="math display">
+A \times B = \{(a,b) ~|~ a \in A, b \in B\}.
+</span>
+This is generalised by chaining × symbols,
+which will result in longer tuples without any surprises.</p>
+<p>In programming, it’s convenient to take the Cartesian product of any number
+of items, and this is called the <em>n-ary Cartesian product</em>.
+To do so, we’ll need a way to hold <em>n</em> many items and this is most naturally a list<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>The Nix language code to do this is here.
+The <code>cartProd</code> function takes a list of lists and returns the Cartesian product of all the inner lists.</p>
+<pre class="nix"><code>let
+  # given a string name and value, returns an attribute set { name = value; }.
+  makeAttr = name: value: builtins.listToAttrs [(lib.nameValuePair name value)];
+  # reduces a list of attributes into a single attribute, concatenating values.
+  concatAttrs = lib.foldAttrs lib.concat [];
+  # given list of lists, returns the cartesian product
+  cartProd = xs:
+    let
+      attr = i: n: makeAttr (lib.fixedWidthNumber 5 i) n;
+      a = lib.imap0 attr xs;
+      b = lib.cartesianProductOfSets (concatAttrs a);
+    in
+      builtins.map builtins.attrValues b;
+in
+  ...</code></pre>
+<p>It works as promised:</p>
+<pre><code>nix-repl&gt; :p cartProd [ [0] [1 2] [3 4]]
+[ [ 0 1 3 ] [ 0 1 4 ] [ 0 2 3 ] [ 0 2 4 ] ]</code></pre>
+<p>And so we are done.</p>
+<h2 id="bad-code">bad code <a href="#bad-code" class="anchor" aria-hidden="true">#</a></h2>
+<p>It doesn’t take very much examination to see that this code is awful.
+Amongst its helper functions, we perform a ritual of converting the list of lists into attribute sets (keyed by string representations of numbers) and then back into the desired lists of lists.</p>
+<p>It could be better, but there is a problem with the Nix language.
+This is a slide from the multiply-skilled <a href="https://xeiaso.net/talks/nixos-pain-2021-11-10">Xe Iaso’s talk</a>.</p>
+<figure>
+<img src="assets/xe-iaso.avif" alt="the language is not the package manager is not the os is not the language. however, nix is the language, the package manager, and the os." />
+<figcaption aria-hidden="true">the language is not the package manager is not the os is not the language. however, nix is the language, the package manager, and the os.</figcaption>
+</figure>
+<p>Nix (in general) is unarguably a step in the right direction for declarative environments,
+but Nix (the language) has its shortcomings.
+It promises the power and flexibility of a functional programming language,
+and yet it feels like the Bash of the package management.
+It’s specialised and fit-for-purpose, and once
+you step outside the intended path and it quickly falls apart.</p>
+<p>This is evident in how the documentation consistently focuses on its uses rather than the language itself.
+The <a href="https://github.com/nix-community/nixpkgs.lib">standard library</a> is never mentioned or documented aside from <a href="https://teu5us.github.io/nix-lib.html">one third-party page</a>.
+The builtins provided are both scarce and haphazard, not fitting together as you’d expect and missing many useful general-purpose operations.
+This leads to silliness like we have in <code>cartProd</code> above
+(specifically, <code>makeAttr</code> should not be so complicated).</p>
+<h2 id="end">end <a href="#end" class="anchor" aria-hidden="true">#</a></h2>
+<p>I think the points I’ve expressed are because of my background
+with general purpose functional languages;
+I expected the Nix language to match their expressiveness.
+Despite this all, the benefits are worth the inconvenience.</p>
+<p>Nix has charmed me like React and Haskell have done in the past.
+It’s a breath of fresh air amongst a crowd of approximately-the-same package managers, and a confident step towards more consistent and reliable software processes.
+This is surely a good thing and I look forward to how it grows :)</p>
+<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>Of course, this is not fully precise as a list can have any length and there’s nothing constraining it to be the correct length. To fix this would require <a href="https://en.wikipedia.org/wiki/Dependent_type">dependent types</a> which is too complex for most programming languages to support.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+
+        </main>
+
+        <!-- <footer>
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </footer> -->
+    </body>
+</html>

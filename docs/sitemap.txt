@@ -1,5 +1,6 @@
 https://rina.fyi/404
 https://rina.fyi/b/
+https://rina.fyi/b/nix-cartprod
 https://rina.fyi/b/site-addendum
 https://rina.fyi/b/site
 https://rina.fyi/b/skuld

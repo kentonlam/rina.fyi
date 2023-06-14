@@ -58,9 +58,9 @@ dir p c indexCont postCont = do
           getResourceBody
             >>= applyAsTemplate (lists <> c)
             >>= indexCont
-  match (p /**?/ "*.md") $
+  matchMetadata (p /**?/ "*.md") ((/= Just True) . lookupBool "draft") $
     do
-      route $ setExtension "html"
+      route $ setExtension ".html"
       compile $ getResourceBody
         >>= postCont
 

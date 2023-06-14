@@ -4,6 +4,8 @@ import Control.Monad
 import Data.List
 
 import Hakyll
+import Hakyll.Core.Routes
+import Data.Char (toLower)
 
 makeEmpty = makeItem (""::String)
 
@@ -81,3 +83,6 @@ replace old new s
 
 cleanURL :: String -> String
 cleanURL = replace "/" "" . trimSuffix ".html" . replaceSuffix "/index.html" "/"
+
+lookupBool :: String -> Metadata -> Maybe Bool
+lookupBool key meta = (== "true" ) . map toLower <$> lookupString key meta

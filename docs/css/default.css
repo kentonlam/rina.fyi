@@ -10,10 +10,6 @@ body {
   /* hyphens: auto; */
 }
 
-pre {
-  overflow-x: auto;
-}
-
 h1 {
   margin: 0;
 }

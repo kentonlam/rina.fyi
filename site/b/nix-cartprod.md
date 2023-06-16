@@ -66,8 +66,7 @@ you step outside the intended path and it quickly falls apart.
 This is evident in how the documentation consistently focuses on its uses rather than the language itself.
 The [standard library](https://github.com/nix-community/nixpkgs.lib) is never mentioned or documented aside from [one third-party page](https://teu5us.github.io/nix-lib.html).
 The builtins provided are both scarce and haphazard, not fitting together as you'd expect and missing many useful general-purpose operations.
-This leads to silliness like we have in `cartProd` above
-(specifically, `makeAttr` should not be so complicated).
+This leads to silliness like we have in `cartProd` above.
 
 ## end
 
@@ -79,3 +78,20 @@ Despite this all, the benefits are worth the inconvenience.
 Nix has charmed me like React and Haskell have done in the past.
 It's a breath of fresh air amongst a crowd of approximately-the-same package managers, and a confident step towards more consistent and reliable software processes.
 This is surely a good thing and I look forward to how it grows :\)
+
+---
+
+## the silly
+
+This is all so ridiculous.
+The goal of all the work above is to be "more efficient" by using the builtin Cartesian product.
+It does some (I assume) clever things with attribute sets to avoid memory operations.
+However, I have decided we don't need that for the use in our Nix config.
+
+Here is a much simpler Cartesian product function:
+```nix
+cartProd =
+  with lib; with builtins;
+  foldl (tls: x: concatMap (tl: map (h: tl ++ [h]) x) tls) [[]];
+```
+And there we go.

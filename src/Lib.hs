@@ -86,3 +86,9 @@ cleanURL = replace "/" "" . trimSuffix ".html" . replaceSuffix "/index.html" "/"
 
 lookupBool :: String -> Metadata -> Maybe Bool
 lookupBool key meta = (== "true" ) . map toLower <$> lookupString key meta
+
+cartProd :: [[a]] -> [[a]]
+cartProd xs = foldl (\y -> \ x -> concatMap (\ t -> map (: t) x ) y) [[]] xs
+
+cartProd' [] = [[]]
+cartProd' (xs:xss) = concatMap (\h -> map (h :) (cartProd' xss)) xs

@@ -109,8 +109,7 @@ you step outside the intended path and it quickly falls apart.</p>
 <p>This is evident in how the documentation consistently focuses on its uses rather than the language itself.
 The <a href="https://github.com/nix-community/nixpkgs.lib">standard library</a> is never mentioned or documented aside from <a href="https://teu5us.github.io/nix-lib.html">one third-party page</a>.
 The builtins provided are both scarce and haphazard, not fitting together as you’d expect and missing many useful general-purpose operations.
-This leads to silliness like we have in <code>cartProd</code> above
-(specifically, <code>makeAttr</code> should not be so complicated).</p>
+This leads to silliness like we have in <code>cartProd</code> above.</p>
 <h2 id="end">end <a href="#end" class="anchor" aria-hidden="true">#</a></h2>
 <p>I think the points I’ve expressed are because of my background
 with general purpose functional languages;
@@ -119,6 +118,17 @@ Despite this all, the benefits are worth the inconvenience.</p>
 <p>Nix has charmed me like React and Haskell have done in the past.
 It’s a breath of fresh air amongst a crowd of approximately-the-same package managers, and a confident step towards more consistent and reliable software processes.
 This is surely a good thing and I look forward to how it grows :)</p>
+<hr />
+<h2 id="the-silly">the silly <a href="#the-silly" class="anchor" aria-hidden="true">#</a></h2>
+<p>This is all so ridiculous.
+The goal of all the work above is to be “more efficient” by using the builtin Cartesian product.
+It does some (I assume) clever things with attribute sets to avoid memory operations.
+However, I have decided we don’t need that for the use in our Nix config.</p>
+<p>Here is a much simpler Cartesian product function:</p>
+<pre class="nix"><code>cartProd =
+  with lib; with builtins;
+  foldl (tls: x: concatMap (tl: map (h: tl ++ [h]) x) tls) [[]];</code></pre>
+<p>And there we go.</p>
 <section class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>

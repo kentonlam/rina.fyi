@@ -72,21 +72,21 @@ of items, and this is called the <em>n-ary Cartesian product</em>.
 To do so, we’ll need a way to hold <em>n</em> many items and this is most naturally a list<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <p>The Nix language code to do this is here.
 The <code>cartProd</code> function takes a list of lists and returns the Cartesian product of all the inner lists.</p>
-<pre class="nix"><code>let
-  # given a string name and value, returns an attribute set { name = value; }.
-  makeAttr = name: value: builtins.listToAttrs [(lib.nameValuePair name value)];
-  # reduces a list of attributes into a single attribute, concatenating values.
-  concatAttrs = lib.foldAttrs lib.concat [];
-  # given list of lists, returns the cartesian product
-  cartProd = xs:
-    let
-      attr = i: n: makeAttr (lib.fixedWidthNumber 5 i) n;
-      a = lib.imap0 attr xs;
-      b = lib.cartesianProductOfSets (concatAttrs a);
-    in
-      builtins.map builtins.attrValues b;
-in
-  ...</code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nix"><code class="sourceCode nix"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># given a string name and value, returns an attribute set { name = value; }.</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">makeAttr</span> <span class="op">=</span> <span class="va">name</span><span class="op">:</span> <span class="va">value</span><span class="op">:</span> <span class="bu">builtins</span>.listToAttrs <span class="op">[(</span>lib.nameValuePair name value<span class="op">)];</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># reduces a list of attributes into a single attribute, concatenating values.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="va">concatAttrs</span> <span class="op">=</span> lib.foldAttrs lib.concat <span class="op">[];</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># given list of lists, returns the cartesian product</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">cartProd</span> <span class="op">=</span> <span class="va">xs</span><span class="op">:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="va">attr</span> <span class="op">=</span> <span class="va">i</span><span class="op">:</span> <span class="va">n</span><span class="op">:</span> makeAttr <span class="op">(</span>lib.fixedWidthNumber <span class="dv">5</span> i<span class="op">)</span> n<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="va">a</span> <span class="op">=</span> lib.imap0 attr xs<span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="va">b</span> <span class="op">=</span> lib.cartesianProductOfSets <span class="op">(</span>concatAttrs a<span class="op">);</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>      <span class="bu">builtins</span>.<span class="bu">map</span> <span class="bu">builtins</span>.attrValues b<span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">in</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  ...</span></code></pre></div>
 <p>It works as promised:</p>
 <pre><code>nix-repl&gt; :p cartProd [ [0] [1 2] [3 4]]
 [ [ 0 1 3 ] [ 0 1 4 ] [ 0 2 3 ] [ 0 2 4 ] ]</code></pre>
@@ -125,14 +125,14 @@ The goal of all the work above is to be “more efficient” by using the builti
 It does some (I assume) clever things with attribute sets to avoid memory operations.
 However, I have decided we don’t need that for the use in our Nix config.</p>
 <p>Here is a much simpler Cartesian product function:</p>
-<pre class="nix"><code>cartProd =
-  with lib; with builtins;
-  foldl (tls: x: concatMap (tl: map (h: tl ++ [h]) x) tls) [[]];</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nix"><code class="sourceCode nix"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cartProd =</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">with</span> lib<span class="op">;</span> <span class="kw">with</span> <span class="bu">builtins</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  foldl <span class="op">(</span><span class="va">tls</span><span class="op">:</span> <span class="va">x</span><span class="op">:</span> concatMap <span class="op">(</span><span class="va">tl</span><span class="op">:</span> <span class="bu">map</span> <span class="op">(</span><span class="va">h</span><span class="op">:</span> tl <span class="op">++</span> <span class="op">[</span>h<span class="op">])</span> x<span class="op">)</span> tls<span class="op">)</span> <span class="op">[[]]</span>;</span></code></pre></div>
 <p>And there we go.</p>
-<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1" role="doc-endnote"><p>Of course, this is not fully precise as a list can have any length and there’s nothing constraining it to be the correct length. To fix this would require <a href="https://en.wikipedia.org/wiki/Dependent_type">dependent types</a> which is too complex for most programming languages to support.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Of course, this is not fully precise as a list can have any length and there’s nothing constraining it to be the correct length. To fix this would require <a href="https://en.wikipedia.org/wiki/Dependent_type">dependent types</a> which is too complex for most programming languages to support.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 

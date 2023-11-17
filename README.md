@@ -13,3 +13,11 @@ Once built, Hakyll is used by executing the built binary (unlike other tools whi
 stack run
 ```
 should suffice.
+
+## nix
+
+If you're lucky enough to use the Nix package manager, this is so much faster:
+```bash
+nix-build .
+```
+Then, run with `LC_ALL=C.utf-8 result/bin/rina-exe`.

@@ -6,5 +6,6 @@ https://rina.fyi/b/site
 https://rina.fyi/b/skuld
 https://rina.fyi
 https://rina.fyi/p/
+https://rina.fyi/p/nix-flakes
 https://rina.fyi/p/primrec
 

@@ -18,6 +18,6 @@ should suffice.
 
 If you're lucky enough to use the Nix package manager, this is so much faster:
 ```bash
-nix-build .
+nix build .
 ```
-Then, run with `LC_ALL=C.utf-8 result/bin/rina-exe`.
+Then, run with `LC_ALL=C.utf-8 nix run .`.

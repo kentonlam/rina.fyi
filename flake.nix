@@ -22,7 +22,7 @@
         in {
           default = pkgs.haskellPackages.developPackage {
             root = pkgs.lib.cleanSourceWith {
-              filter = name: type: !(baseNameOf name == "docs" || baseNameOf name == "site");
+              filter = name: type: !(pkgs.lib.elem (baseNameOf name) ["docs" "site" ".github"]);
               src = ./.;
             };
           };

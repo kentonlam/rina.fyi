@@ -3,17 +3,22 @@ title: Home
 ---
 
 Hi there, you can call me Kait.
-I'm a computer science + maths student completing my
-undergraduate thesis.
+I'm a program analysis researcher
+at the University of Queensland, Australia
+after previously completing an
+undergraduate degree in computer science + maths.
+<!-- student completing my undergraduate thesis. -->
 
-Most of my experience is in &ldquo;modern&rdquo; web development.
+<!-- Most of my experience is in &ldquo;modern&rdquo; web development. -->
 I'm interested in compilers, and formal methods and static analysis.
 Currently, I do work on binary analysis.
 
 Sometimes, I do coding problems and puzzles like Advent of Code.
 Functional programming is exciting!
 
-If you want, you can reach me at k(at)rina.fyi or on Twitter as [\@kaitrna](https://twitter.com/kaitrna).
+If you want, you can reach me by email at kait(dot)lam(at)uq.edu.au or,
+for less formal correspondence,
+k(at)rina.fyi or [\@kait\@tech.lgbt](https://tech.lgbt/@kait).
 
 Have a great day! ^_^
 

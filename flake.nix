@@ -21,8 +21,10 @@
         let pkgs = nixpkgs.legacyPackages.${sys};
         in {
           default = pkgs.haskellPackages.developPackage {
-            root = pkgs.nix-gitignore.gitignoreSource
-              [ "/docs" ] ./.;
+            root = pkgs.lib.cleanSourceWith {
+              filter = name: type: !(baseNameOf name == "docs" || baseNameOf name == "site");
+              src = ./.;
+            };
           };
         }
       );

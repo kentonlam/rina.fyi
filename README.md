@@ -1,5 +1,7 @@
 # rina
 
+[![Build and deploy to Pages](https://github.com/katrinafyi/rina.fyi/actions/workflows/pages.yml/badge.svg)](https://github.com/katrinafyi/rina.fyi/actions/workflows/pages.yml)
+
 This site is built with Hakyll, with package management by Haskell's stack tool.
 It should be sufficient to run
 ```bash

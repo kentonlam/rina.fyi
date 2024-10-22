@@ -67,6 +67,6 @@ main = hakyllWith config $
           do
             let ctx = listField "files"
                       (constField "base" base <> context)
-                      (loadAll ("*.md" .||. "**/*.md"))
+                      (loadAll ("*.md" .||. "**/*.md" .||. "*.pdf"))
             makeEmpty
               >>= loadAndApplyTemplate "templates/sitemap.txt" ctx

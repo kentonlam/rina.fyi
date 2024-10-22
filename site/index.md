@@ -31,6 +31,7 @@ Coughlin, N., Lam, K., Smith, G., &amp; Winter, K. (2025). Detecting Speculative
 
 Lam, K., &amp; Coughlin, N. (2023). Lift-off: Trustworthy ARMv8 semantics from formal specifications. In A. Nadel &amp; K. Y. Rozier (Eds.), <i>Proceedings of the 23rd Conference on Formal Methods in Computer-Aided Design &ndash; FMCAD 2023</i> (pp. 274&#x2013;283). TU Wien Academic Press.
 [10.34727/2023/isbn.978-3-85448-060-0_36](https://doi.org/10.34727/2023/isbn.978-3-85448-060-0_36)
+<span style="white-space: nowrap;">([Slides](/slides_2023.pdf))</span>
 <span style="white-space: nowrap;">([Best Paper Award](https://fmcad.org/FMCAD23/awards/))</span>
 
 ORCID: [0009-0001-2599-2259](https://orcid.org/0009-0001-2599-2259)

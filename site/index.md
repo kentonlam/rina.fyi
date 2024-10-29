@@ -10,18 +10,29 @@ undergraduate degree in computer science + maths.
 <!-- student completing my undergraduate thesis. -->
 
 <!-- Most of my experience is in &ldquo;modern&rdquo; web development. -->
-I'm interested in compilers, and formal methods and static analysis.
-Currently, I do work on binary analysis.
-I enjoy making things work, and then making sure they keep working.
+<!-- I'm interested in compilers, and formal methods and static analysis. -->
+<!-- Currently, I do work on binary analysis. -->
+<!---->
+<!-- Sometimes, I do coding problems and puzzles like Advent of Code. -->
+<!-- Functional programming and theorem provers are exciting! -->
 
-Sometimes, I do coding problems and puzzles like Advent of Code.
-Functional programming and theorem provers are exciting!
+Currently, I do work on binary analysis and binary lifting to facilitate formal methods.
+I enjoy making things work, and then making sure they keep on working.
+
+I'm interested in learning about:
+
+- functional programming and type systems,
+- dependently-typed proof assistants,
+- staged programming,
+- logics,
+- education and visualisations, and
+- user experience and developer experience.
 
 If you want, you can reach me by email at kait(dot)lam(at)uq.edu.au or,
 for less formal correspondence,
 k(at)rina.fyi or [\@kait\@tech.lgbt](https://tech.lgbt/@kait).
 
-Have a great day! ^_^
+Have a great day! ^^
 
 <h4>Publications</h4>
 

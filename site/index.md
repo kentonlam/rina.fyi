@@ -16,8 +16,13 @@ undergraduate degree in computer science + maths.
 <!-- Sometimes, I do coding problems and puzzles like Advent of Code. -->
 <!-- Functional programming and theorem provers are exciting! -->
 
-Currently, I do work on binary analysis and binary lifting to facilitate formal methods.
+Currently, I do work on binary analysis and binary lifting, for the purpose of
+applying formal methods to binaries.
 I enjoy making things work, and then making sure they keep on working.
+
+Nowadays, I use a lot of OCaml, Nix, and Python.
+I have also learned some of
+C++, Haskell, and Typescript.
 
 I'm interested in learning about:
 
